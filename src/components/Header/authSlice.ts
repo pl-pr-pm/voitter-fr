@@ -3,99 +3,107 @@ import { RootState } from "../../app/store";
 import axios from "axios";
 // import { PROPS_AUTHEN, PROPS_NICKNAME, PROPS_PROFILE } from "../types";
 
-const apiUrl = process.env.REACT_APP_DEV_API_URL;
+type PROPS_SIGNINUP_AUTHEN = {
+  username: string;
+  password: string;
+};
 
-// export const fetchAsyncLogin = createAsyncThunk(
-//   "auth/post", //action name
-//   async (authen: PROPS_AUTHEN) => {
-//     const res = await axios.post(`${apiUrl}authen/jwt/create`, authen, {
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//     });
-//     return res.data;
-//   }
-// );
+type PROPS_PROFILE_AUTHEN = {
+  username: string;
+  imageUrl: string;
+};
 
-// // 新規アカウント作成
-// export const fetchAsyncLegister = createAsyncThunk(
-//   "auth/register",
-//   async (authen: PROPS_AUTHEN) => {
-//     const res = await axios.post(`${apiUrl}api/register/`, authen, {
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//     });
-//     return res.data;
-//   }
-// );
+type PROPS_UPDATE_PROFILE_AUTHEN = {
+  username: string;
+  image: File | null;
+  isImageChange: boolean;
+};
 
-// // 新規プロフィール作成
-// export const fetchAsyncCreateProf = createAsyncThunk(
-//   "profile/post",
-//   async (nickName: PROPS_NICKNAME) => {
-//     const res = await axios.post(`${apiUrl}api/profile/`, nickName, {
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `JWT ${localStorage.localJWT}`,
-//       },
-//     });
-//     return res.data;
-//   }
-// );
+type PROPS_LOGOUT_AUTHEN = {
+  username: string;
+};
 
-// export const fetchAsyncUpdateProf = createAsyncThunk(
-//   "profile/put",
-//   async (profile: PROPS_PROFILE) => {
-//     const uploadData = new FormData();
-//     uploadData.append("nickName", profile.nickName);
-//     profile.img && uploadData.append("img", profile.img, profile.img.name);
-//     const res = await axios.put(
-//       `${apiUrl}api/profile/${profile.id}/`,
-//       uploadData,
-//       {
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `JWT ${localStorage.localJWT}`,
-//         },
-//       }
-//     );
-//     return res.data;
-//   }
-// );
+const apiUrl = "https://localhost.voitter.tk:3001/";
 
-// export const fetchAsyncGetProf = createAsyncThunk("profile/get", async () => {
-//   const res = await axios.get(`${apiUrl}api/myprofile/`, {
-//     headers: {
-//       Authorization: `JWT ${localStorage.localJWT}`,
-//     },
-//   });
-//   return res.data[0]; // 配列で返却されるため、０番目の要素を取得
-// });
+export const fetchAsyncSignup = createAsyncThunk(
+  "auth/signup", //action name
+  async (authen: PROPS_SIGNINUP_AUTHEN) => {
+    const res = await axios.post(`${apiUrl}auth/signup`, authen, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return res.data;
+  }
+);
 
-// export const fetchAsyncGetProfs = createAsyncThunk("profiles/get", async () => {
-//   const res = await axios.get(`${apiUrl}api/profile/`, {
-//     headers: {
-//       Authorization: `JWT ${localStorage.localJWT}`,
-//     },
-//   });
-//   return res.data;
-// });
+export const fetchAsyncLogin = createAsyncThunk(
+  "auth/login", //action name
+  async (authen: PROPS_SIGNINUP_AUTHEN) => {
+    const res = await axios.post(`${apiUrl}auth/signin`, authen, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return res.data;
+  }
+);
+
+export const fetchAsyncLogout = createAsyncThunk(
+  "auth/logout", //action name
+  async () => {
+    const res = await axios.post(`${apiUrl}auth/signout`, null, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("fetchAsynLogout finished");
+    return;
+  }
+);
+
+export const fetchAsyncGetProf = createAsyncThunk(
+  "prof/get", //action name
+  async () => {
+    const res = await axios.get(`${apiUrl}auth/user`, {
+      withCredentials: true,
+    });
+    return res.data[0];
+  }
+);
+
+export const fetchAsyncUpdateProf = createAsyncThunk(
+  "prof/update", //action name
+  async (authen: any) => {
+    // 強行突破
+    console.log("authen", authen);
+    const res = await axios.post(`${apiUrl}auth/user`, authen, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return res.data;
+  }
+);
 
 export const authSlice = createSlice({
   name: "auth",
   // それぞれのモーダル用にフラグを持っている。
   initialState: {
-    // openSignIn: true, //for login modal
-    // openSignUp: false, //for register modal
+    openSignIn: false, //for login modal
+    openSignUp: false, //for register modal
     openProfile: false, //for profile modal
+    openLogout: false,
     isLoadingAuth: false,
-    myprofile: {
-      id: 0,
-      nickName: "",
-      userProfile: 0,
-      created_on: "",
-      img: "",
+    loginUsername: "",
+    profile: {
+      username: "",
+      password: "",
+      imageUrl: "",
     },
   },
 
@@ -108,18 +116,24 @@ export const authSlice = createSlice({
     fetchCredEnd(state) {
       state.isLoadingAuth = false;
     },
-    // setOpenSignIn(state) {
-    //   state.openSignIn = true;
-    // },
-    // resetOpenSignIn(state) {
-    //   state.openSignIn = false;
-    // },
-    // setOpenSignUp(state) {
-    //   state.openSignUp = true;
-    // },
-    // resetOpenSignUp(state) {
-    //   state.openSignUp = false;
-    // },
+    setOpenSignIn(state) {
+      state.openSignIn = true;
+    },
+    resetOpenSignIn(state) {
+      state.openSignIn = false;
+    },
+    setOpenSignUp(state) {
+      state.openSignUp = true;
+    },
+    resetOpenSignUp(state) {
+      state.openSignUp = false;
+    },
+    setOpenLogout(state) {
+      state.openLogout = true;
+    },
+    resetOpenLogout(state) {
+      state.openLogout = false;
+    },
     setOpenProfile(state) {
       state.openProfile = true;
     },
@@ -127,53 +141,70 @@ export const authSlice = createSlice({
     resetOpenProfile(state) {
       state.openProfile = false;
     },
-    editNickname(state, action) {
-      state.myprofile.nickName = action.payload;
+    editLoginUsername(state, action) {
+      state.loginUsername = action.payload;
+    },
+    editUsername(state, action) {
+      state.profile.username = action.payload;
+    },
+    editPassword(state, action) {
+      state.profile.password = action.payload;
+    },
+    editImageUrl(state, action) {
+      state.profile.imageUrl = action.payload;
     },
   },
-  // extraReducers: (builder) => {
-  //   builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
-  //     localStorage.setItem("localJWT", action.payload.access);
-  //   });
-  //   builder.addCase(fetchAsyncCreateProf.fulfilled, (state, action) => {
-  //     console.log(
-  //       `fetchAsyncCreateProf.fulfilled action payload is ${action.payload}`
-  //     );
-  //     state.myprofile = action.payload;
-  //   });
-  //   builder.addCase(fetchAsyncGetProf.fulfilled, (state, action) => {
-  //     state.myprofile = action.payload;
-  //   });
-  //   builder.addCase(fetchAsyncGetProfs.fulfilled, (state, action) => {
-  //     state.profiles = action.payload;
-  //   });
-  //   builder.addCase(fetchAsyncUpdateProf.fulfilled, (state, action) => {
-  //     state.myprofile = action.payload;
-  //     state.profiles = state.profiles.map((profile) =>
-  //       profile.id === action.payload.id ? action.payload : profile
-  //     );
-  //   });
-  // },
+  extraReducers: (builder) => {
+    builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
+      return {
+        ...state,
+        loginUsername: action.payload,
+      };
+    });
+    builder.addCase(fetchAsyncLogout.fulfilled, (state, action) => {
+      state.loginUsername = "";
+      state.profile = {
+        username: "",
+        password: "",
+        imageUrl: "",
+      };
+    });
+
+    builder.addCase(fetchAsyncGetProf.fulfilled, (state, action) => {
+      state.profile = action.payload;
+      console.log("state.profile", state.profile);
+    });
+
+    builder.addCase(fetchAsyncUpdateProf.fulfilled, (state, action) => {
+      console.log(action.payload);
+      state.profile = action.payload;
+    });
+  },
 });
 
 export const {
   fetchCredStart,
   fetchCredEnd,
-  // setOpenSignIn,
-  // resetOpenSignIn,
-  // setOpenSignUp,
-  // resetOpenSignUp,
+  setOpenSignIn,
+  resetOpenSignIn,
+  setOpenSignUp,
+  resetOpenSignUp,
   setOpenProfile,
   resetOpenProfile,
-  editNickname,
+  setOpenLogout,
+  resetOpenLogout,
+  editUsername,
+  editPassword,
+  editImageUrl,
 } = authSlice.actions;
 
 export const selectIsLoadingAuth = (state: RootState) =>
   state.auth.isLoadingAuth;
 export const selectOpenSignIn = (state: RootState) => state.auth.openSignIn;
 export const selectOpenSignUp = (state: RootState) => state.auth.openSignUp;
+export const selectOpenLogout = (state: RootState) => state.auth.openLogout;
+export const selectLoginuser = (state: RootState) => state.auth.loginUsername;
 export const selectOpenProfile = (state: RootState) => state.auth.openProfile;
-export const selectProfile = (state: RootState) => state.auth.myprofile;
-export const selectProfiles = (state: RootState) => state.auth.profiles;
+export const selectProfile = (state: RootState) => state.auth.profile;
 
 export default authSlice.reducer;

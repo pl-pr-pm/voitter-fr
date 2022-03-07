@@ -1,13 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { Button, Avatar } from "@material-ui/core";
+import { Avatar } from "@material-ui/core";
 import { useSelector, useDispatch } from "react-redux";
-import { setOpenProfile } from "../Header/authSlice";
+import {
+  selectLoginuser,
+  setOpenProfile,
+  selectProfile,
+  fetchAsyncGetProf,
+  setOpenSignIn,
+} from "../Header/authSlice";
 
 const Header = () => {
-  const [username, setUsername] = useState("");
   const [searchText, setSearchText] = useState("");
   const dispatch = useDispatch();
-  useEffect(() => {});
+
+  const profile = useSelector(selectProfile);
+
+  const loginUser = useSelector(selectLoginuser);
+
+  useEffect(() => {
+    const fetchBootLoader = async () => {
+      if (loginUser) {
+        await dispatch(fetchAsyncGetProf()); // profile取得
+        await setlProfile(profile);
+      }
+    };
+    fetchBootLoader();
+  }, [loginUser]);
   return (
     <>
       <h1 className="title">Voitter</h1>
@@ -21,13 +39,17 @@ const Header = () => {
         <button>SEARCH</button>
       </div>
       <div className="Avator">
-        <button
+        <p
           onClick={() => {
-            dispatch(setOpenProfile());
+            loginUser ? dispatch(setOpenProfile()) : dispatch(setOpenSignIn());
           }}
         >
-          <Avatar src="/Users/Ryo_Ito/work/voitter-fr/public/favicon.ico" />
-        </button>
+          {loginUser ? (
+            <Avatar src={profile.imageUrl} />
+          ) : (
+            <button>Login</button>
+          )}
+        </p>
       </div>
     </>
   );
