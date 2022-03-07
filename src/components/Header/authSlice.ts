@@ -23,7 +23,7 @@ type PROPS_LOGOUT_AUTHEN = {
   username: string;
 };
 
-const apiUrl = "https://localhost.voitter.tk:3001/";
+const apiUrl = process.env.REACT_APP_DEV_API_URL;
 
 export const fetchAsyncSignup = createAsyncThunk(
   "auth/signup", //action name
@@ -60,7 +60,6 @@ export const fetchAsyncLogout = createAsyncThunk(
         "Content-Type": "application/json",
       },
     });
-    console.log("fetchAsynLogout finished");
     return;
   }
 );
@@ -79,7 +78,6 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
   "prof/update", //action name
   async (authen: any) => {
     // 強行突破
-    console.log("authen", authen);
     const res = await axios.post(`${apiUrl}auth/user`, authen, {
       withCredentials: true,
       headers: {
@@ -172,11 +170,9 @@ export const authSlice = createSlice({
 
     builder.addCase(fetchAsyncGetProf.fulfilled, (state, action) => {
       state.profile = action.payload;
-      console.log("state.profile", state.profile);
     });
 
     builder.addCase(fetchAsyncUpdateProf.fulfilled, (state, action) => {
-      console.log(action.payload);
       state.profile = action.payload;
     });
   },
