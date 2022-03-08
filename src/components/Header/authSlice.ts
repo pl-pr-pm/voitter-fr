@@ -1,10 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../app/store";
-
-// import { PROPS_AUTHEN, PROPS_NICKNAME, PROPS_PROFILE } from "../types";
 
 type PROPS_SIGNINUP_AUTHEN = {
   username: string;
