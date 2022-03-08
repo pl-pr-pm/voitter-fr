@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../app/store";
+
 // import { PROPS_AUTHEN, PROPS_NICKNAME, PROPS_PROFILE } from "../types";
 
 type PROPS_SIGNINUP_AUTHEN = {
@@ -11,16 +14,6 @@ type PROPS_SIGNINUP_AUTHEN = {
 type PROPS_PROFILE_AUTHEN = {
   username: string;
   imageUrl: string;
-};
-
-type PROPS_UPDATE_PROFILE_AUTHEN = {
-  username: string;
-  image: File | null;
-  isImageChange: boolean;
-};
-
-type PROPS_LOGOUT_AUTHEN = {
-  username: string;
 };
 
 const apiUrl = process.env.REACT_APP_DEV_API_URL;
@@ -54,37 +47,83 @@ export const fetchAsyncLogin = createAsyncThunk(
 export const fetchAsyncLogout = createAsyncThunk(
   "auth/logout", //action name
   async () => {
-    const res = await axios.post(`${apiUrl}auth/signout`, null, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return;
+    try {
+      const res = await axios.post(`${apiUrl}auth/signout`, null, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (e: any) {
+      // AccessTokenが期限切れた場合、refresh API を実行する
+      if (e.message.indexOf("401") !== -1) {
+        console.log("error", e.message);
+        await axios.get(`${apiUrl}auth/refresh`, {
+          withCredentials: true,
+        });
+        await axios.post(`${apiUrl}auth/signout`, null, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+    }
   }
 );
 
 export const fetchAsyncGetProf = createAsyncThunk(
   "prof/get", //action name
   async () => {
-    const res = await axios.get(`${apiUrl}auth/user`, {
-      withCredentials: true,
-    });
-    return res.data[0];
+    try {
+      const res = await axios.get(`${apiUrl}auth/user`, {
+        withCredentials: true,
+      });
+      return res.data[0];
+    } catch (e: any) {
+      // AccessTokenが期限切れた場合、refresh API を実行する
+      if (e.message.indexOf("401") !== -1) {
+        console.log("error", e.message);
+        await axios.get(`${apiUrl}auth/refresh`, {
+          withCredentials: true,
+        });
+        const res = await axios.get(`${apiUrl}auth/user`, {
+          withCredentials: true,
+        });
+        return res.data[0];
+      }
+    }
   }
 );
 
 export const fetchAsyncUpdateProf = createAsyncThunk(
   "prof/update", //action name
+  // 型強行突破
   async (authen: any) => {
-    // 強行突破
-    const res = await axios.post(`${apiUrl}auth/user`, authen, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return res.data;
+    try {
+      const res = await axios.post(`${apiUrl}auth/user`, authen, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return res.data;
+    } catch (e: any) {
+      // AccessTokenが期限切れた場合、refresh API を実行する
+      if (e.message.indexOf("401") !== -1) {
+        console.log("error", e.message);
+        await axios.get(`${apiUrl}auth/refresh`, {
+          withCredentials: true,
+        });
+        const res = await axios.post(`${apiUrl}auth/user`, authen, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        return res.data;
+      }
+    }
   }
 );
 
@@ -154,10 +193,7 @@ export const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
-      return {
-        ...state,
-        loginUsername: action.payload,
-      };
+      state.loginUsername = action.payload;
     });
     builder.addCase(fetchAsyncLogout.fulfilled, (state, action) => {
       state.loginUsername = "";
@@ -166,6 +202,17 @@ export const authSlice = createSlice({
         password: "",
         imageUrl: "",
       };
+    });
+
+    builder.addCase(fetchAsyncLogout.rejected, (state, action) => {
+      const dispatch: AppDispatch = useDispatch();
+      const username = state.profile.username;
+      const password = state.profile.password;
+      const authen: PROPS_SIGNINUP_AUTHEN = {
+        username,
+        password,
+      };
+      dispatch(fetchAsyncLogin(authen));
     });
 
     builder.addCase(fetchAsyncGetProf.fulfilled, (state, action) => {
