@@ -11,11 +11,6 @@ type PROPS_SIGNINUP_AUTHEN = {
   password: string;
 };
 
-type PROPS_PROFILE_AUTHEN = {
-  username: string;
-  imageUrl: string;
-};
-
 const apiUrl = process.env.REACT_APP_DEV_API_URL;
 
 export const fetchAsyncSignup = createAsyncThunk(
@@ -192,9 +187,20 @@ export const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(fetchAsyncSignup.rejected, (state, action) => {
+      const errorText = `Errorが発生しました: ${action.error.message}`;
+      window.alert(errorText);
+    });
+
     builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
       state.loginUsername = action.payload;
     });
+
+    builder.addCase(fetchAsyncLogin.rejected, (state, action) => {
+      const errorText = `Errorが発生しました: ${action.error.message}`;
+      window.alert(errorText);
+    });
+
     builder.addCase(fetchAsyncLogout.fulfilled, (state, action) => {
       state.loginUsername = "";
       state.profile = {
@@ -205,22 +211,24 @@ export const authSlice = createSlice({
     });
 
     builder.addCase(fetchAsyncLogout.rejected, (state, action) => {
-      const dispatch: AppDispatch = useDispatch();
-      const username = state.profile.username;
-      const password = state.profile.password;
-      const authen: PROPS_SIGNINUP_AUTHEN = {
-        username,
-        password,
-      };
-      dispatch(fetchAsyncLogin(authen));
+      const errorText = `Errorが発生しました: ${action.error.message}`;
+      window.alert(errorText);
     });
 
     builder.addCase(fetchAsyncGetProf.fulfilled, (state, action) => {
       state.profile = action.payload;
     });
+    builder.addCase(fetchAsyncGetProf.rejected, (state, action) => {
+      const errorText = `Errorが発生しました: ${action.error.message}`;
+      window.alert(errorText);
+    });
 
     builder.addCase(fetchAsyncUpdateProf.fulfilled, (state, action) => {
       state.profile = action.payload;
+    });
+    builder.addCase(fetchAsyncUpdateProf.rejected, (state, action) => {
+      const errorText = `Errorが発生しました: ${action.error.message}`;
+      window.alert(errorText);
     });
   },
 });
