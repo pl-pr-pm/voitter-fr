@@ -68,7 +68,7 @@ export const Timeline: React.FC = () => {
 
       {timelines.map((timeline, index) => (
         <Tweet
-          id={index}
+          index={index}
           tweetText={timeline.tweetContent.tweetText}
           createdAt={timeline.tweetContent.createdAt}
         />

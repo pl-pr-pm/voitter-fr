@@ -1,12 +1,14 @@
 import React from "react";
-
+import { useDispatch } from "react-redux";
+import { setCurrentTrackIndex } from "./timelineSlice";
 export const Tweet: React.FC<{
-  id: number;
+  index: number;
   tweetText: string;
   createdAt: string;
-}> = ({ tweetText, createdAt }) => {
+}> = ({ index, tweetText, createdAt }) => {
+  const dispatch = useDispatch();
   return (
-    <div>
+    <div onClick={() => dispatch(setCurrentTrackIndex(index))}>
       {tweetText}
       <br />
       {createdAt}
