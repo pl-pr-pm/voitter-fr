@@ -43,7 +43,7 @@ export const timelineSlice = createSlice({
     isLoadingTimeline: false,
     openNewTimeline: false,
     timelineUserinfo: {
-      timelineUsername: "",
+      username: "",
       description: "",
       profile_image_url: "",
     },
