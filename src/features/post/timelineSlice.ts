@@ -29,7 +29,7 @@ export const fetchAsyncGetTimelineTranslate = createAsyncThunk(
 export const fetchAsyncGetUserInfo = createAsyncThunk(
   "userinfo/get",
   async (username: string) => {
-    const res = await axios.get(apiUrlUserinfo, {
+    const res = await axios.get(`${apiUrlUserinfo}?username=${username}`, {
       withCredentials: true,
     });
     return res.data;
@@ -39,6 +39,7 @@ export const fetchAsyncGetUserInfo = createAsyncThunk(
 export const timelineSlice = createSlice({
   name: "timeline",
   initialState: {
+    targetUsername: "",
     isLoadingTimeline: false,
     openNewTimeline: false,
     timelineUserinfo: {
@@ -46,21 +47,28 @@ export const timelineSlice = createSlice({
       description: "",
       profile_image_url: "",
     },
-    tweetContent: [
+    timelines: [
       {
-        tweetText: "",
-        createdAt: "",
-        voiceUrl: "",
+        _id: "",
+        tweetContent: {
+          tweetText: "",
+          createdAt: "",
+          voiceUrl: "",
+        },
+        username: "",
       },
     ],
   },
 
   reducers: {
-    fetchTimelineStart(state) {
+    setTimelineStart(state) {
       state.isLoadingTimeline = true;
     },
-    fetchTimelineEnd(state) {
+    setTimelineEnd(state) {
       state.isLoadingTimeline = false;
+    },
+    editTargetUsername(state, action) {
+      state.targetUsername = action.payload;
     },
     // setOpenNewPost(state) {
     //   state.openNewPost = true;
@@ -71,29 +79,30 @@ export const timelineSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAsyncGetTimeline.fulfilled, (state, action) => {
-      state.tweetContent = action.payload.tweetContent;
+      console.log(action.payload);
+      state.timelines = action.payload;
     });
     builder.addCase(
       fetchAsyncGetTimelineTranslate.fulfilled,
       (state, action) => {
-        state.tweetContent = action.payload.tweetContent;
+        state.timelines = action.payload;
       }
     );
     builder.addCase(fetchAsyncGetUserInfo.fulfilled, (state, action) => {
-      state.timelineUserinfo = {
-        timelineUsername: action.payload.username,
-        description: action.payload.description,
-        profile_image_url: action.payload.profile_image_url,
-      };
+      console.log(action.payload);
+      state.timelineUserinfo = action.payload;
     });
   },
 });
-export const { fetchTimelineStart, fetchTimelineEnd } = timelineSlice.actions;
+export const { setTimelineStart, setTimelineEnd, editTargetUsername } =
+  timelineSlice.actions;
 
 export const selectIsLoadingTimeline = (state: RootState) =>
   state.timeline.isLoadingTimeline;
+export const selectTargetUsername = (state: RootState) =>
+  state.timeline.targetUsername;
 // export const selectOpenNewTimeline = (state: RootState) => state.post.openNewPost;
-export const selectTimeline = (state: RootState) => state.timeline.tweetContent;
+export const selectTimeline = (state: RootState) => state.timeline.timelines;
 export const selectUserInfo = (state: RootState) =>
   state.timeline.timelineUserinfo;
 
