@@ -58,6 +58,7 @@ export const timelineSlice = createSlice({
         username: "",
       },
     ],
+    currentTrackIndex: 0,
   },
 
   reducers: {
@@ -69,6 +70,9 @@ export const timelineSlice = createSlice({
     },
     editTargetUsername(state, action) {
       state.targetUsername = action.payload;
+    },
+    setCurrentTrackIndex(state, action) {
+      state.currentTrackIndex = action.payload;
     },
     // setOpenNewPost(state) {
     //   state.openNewPost = true;
@@ -94,8 +98,12 @@ export const timelineSlice = createSlice({
     });
   },
 });
-export const { setTimelineStart, setTimelineEnd, editTargetUsername } =
-  timelineSlice.actions;
+export const {
+  setTimelineStart,
+  setTimelineEnd,
+  editTargetUsername,
+  setCurrentTrackIndex,
+} = timelineSlice.actions;
 
 export const selectIsLoadingTimeline = (state: RootState) =>
   state.timeline.isLoadingTimeline;
@@ -105,5 +113,7 @@ export const selectTargetUsername = (state: RootState) =>
 export const selectTimeline = (state: RootState) => state.timeline.timelines;
 export const selectUserInfo = (state: RootState) =>
   state.timeline.timelineUserinfo;
+export const selectCurrentTrackIndex = (state: RootState) =>
+  state.timeline.currentTrackIndex;
 
 export default timelineSlice.reducer;

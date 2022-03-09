@@ -10,8 +10,8 @@ import { AppDispatch } from "../../app/store";
 
 import {
   selectTimeline,
-  fetchAsyncGetTimeline,
-  fetchAsyncGetTimelineTranslate,
+  selectCurrentTrackIndex,
+  setCurrentTrackIndex,
 } from "./timelineSlice";
 import { Tweet } from "./Tweet";
 
@@ -32,26 +32,26 @@ interface PROPS_TIMELINE {
 // }));
 
 export const Timeline: React.FC = () => {
+  const dispatch = useDispatch();
   const timelines = useSelector(selectTimeline);
-  console.log(timelines);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const currentTrackIndex = useSelector(selectCurrentTrackIndex);
 
   const handleClickProvious = () => {
     const index =
       currentTrackIndex === 0 ? timelines.length - 1 : currentTrackIndex - 1;
-    setCurrentTrackIndex(index);
+    dispatch(setCurrentTrackIndex(index));
   };
 
   const handleClickNext = () => {
     const index =
       currentTrackIndex < timelines.length - 1 ? currentTrackIndex + 1 : 0;
-    setCurrentTrackIndex(index);
+    dispatch(setCurrentTrackIndex(index));
   };
 
   const handleTrackEnd = () => {
     if (currentTrackIndex !== timelines.length - 1) {
       const index = currentTrackIndex + 1;
-      setCurrentTrackIndex(index);
+      dispatch(setCurrentTrackIndex(index));
     }
   };
   return (
