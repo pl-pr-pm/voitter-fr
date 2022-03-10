@@ -1,0 +1,38 @@
+.header_container {
+  font-family: "Noto Sans JP", sans-serif;
+  display: flex;
+  justify-content: space-around;
+  position: sticky;
+  top: 0;
+  justify-content: center;
+  align-items: center;
+  border-bottom: solid 0.1rem;
+  border-color: #dddddd;
+}
+
+.header_title {
+  margin-right: 5%;
+}
+
+.header_searchBox {
+  width: 80%;
+  display: flex;
+}
+
+.header_input {
+  font-size: medium;
+  width: 80%;
+}
+
+.header_switch {
+  margin-right: 3%;
+}
+
+button {
+  border: none;
+}
+
+input {
+  border-radius: 1em;
+  border-color: rgb(208, 217, 226);
+}
