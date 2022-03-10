@@ -1,4 +1,4 @@
-import { Avatar } from "@material-ui/core";
+import { Avatar, Card, CardContent, Typography } from "@material-ui/core";
 
 import { useSelector } from "react-redux";
 
@@ -8,10 +8,14 @@ import { selectUserInfo } from "./timelineSlice";
 export const TimelineUserInfo = () => {
   const userInfo = useSelector(selectUserInfo);
   return (
-    <div className="userinfoContiener">
-      <Avatar src={userInfo.profile_image_url} />
-      <p>{userInfo.username}</p>
-      <article>{userInfo.description}</article>
-    </div>
+    <Card className="userinfoContiener">
+      <CardContent>
+        <Avatar src={userInfo.profile_image_url} />
+        <Typography component="h2">{userInfo.username}</Typography>
+        <Typography variant="body2" color="textSecondary" component="p">
+          {userInfo.description}
+        </Typography>
+      </CardContent>
+    </Card>
   );
 };
