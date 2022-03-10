@@ -12,8 +12,11 @@ import {
   selectTimeline,
   selectCurrentTrackIndex,
   setCurrentTrackIndex,
+  selectUserInfo,
 } from "./timelineSlice";
 import { Tweet } from "./Tweet";
+import { TimelineUserInfo } from "./TimelineUserInfo";
+import { Box } from "@material-ui/core";
 
 // import { PROPS_POST } from "../types";
 
@@ -35,6 +38,7 @@ export const Timeline: React.FC = () => {
   const dispatch = useDispatch();
   const timelines = useSelector(selectTimeline);
   const currentTrackIndex = useSelector(selectCurrentTrackIndex);
+  const userInfo = useSelector(selectUserInfo);
 
   const handleClickProvious = () => {
     const index =
@@ -65,14 +69,16 @@ export const Timeline: React.FC = () => {
         onClickNext={() => handleClickNext()}
         onEnded={() => handleTrackEnd()}
       />
-
-      {timelines.map((timeline, index) => (
-        <Tweet
-          index={index}
-          tweetText={timeline.tweetContent.tweetText}
-          createdAt={timeline.tweetContent.createdAt}
-        />
-      ))}
+      <Box>
+        {timelines.map((timeline, index) => (
+          <Tweet
+            index={index}
+            tweetText={timeline.tweetContent.tweetText}
+            createdAt={timeline.tweetContent.createdAt}
+          />
+        ))}
+      </Box>
+      {userInfo.username ? <TimelineUserInfo /> : <div></div>}
     </>
   );
 };
