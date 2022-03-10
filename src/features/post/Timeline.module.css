@@ -1,3 +1,11 @@
 .timeline_container {
   display: flex;
+  z-index: -1;
+}
+
+.timeilne_player {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
 }
