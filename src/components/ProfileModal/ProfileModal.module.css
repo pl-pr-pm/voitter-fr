@@ -1,0 +1,27 @@
+.profileModal_title {
+  font-family: "Noto Sans JP", sans-serif;
+  /* font-weight: normal; */
+  text-align: center;
+}
+.profileModal_signUp {
+  display: flex;
+  flex-direction: column;
+}
+
+.profileModal_text {
+  color: rgb(6, 153, 211);
+  text-align: center;
+  cursor: pointer;
+}
+.profileModal_btnModal {
+  margin-top: 1%;
+  cursor: pointer;
+}
+
+.profileModal_btnSpan {
+  cursor: pointer;
+}
+
+form {
+  font-family: "Noto Sans JP", sans-serif;
+}

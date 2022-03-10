@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
-import styles from "./Core.module.css";
+import styles from "./ProfileModal.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "../../app/store";
 
@@ -43,10 +43,6 @@ const customStyles = {
   },
 };
 
-// interface CFormData extends FormData {
-//   append(name: string, value: string | File | boolean): void;
-// }
-
 const ProfileModal: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const openProfile = useSelector(selectOpenProfile);
@@ -65,11 +61,6 @@ const ProfileModal: React.FC = () => {
   const handleUpdateProfile = async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const isImageChange = image ? "true" : "false";
-    // const packet = {
-    //   username: username,
-    //   image: image,
-    //   isImageChange: isImageChange,
-    // };
     const params = new FormData();
     params.append("username", username);
     if (image) {
@@ -122,9 +113,8 @@ const ProfileModal: React.FC = () => {
         style={customStyles}
       >
         {
-          <form className={styles.core_signUp}>
-            <h1 className={styles.core_title}>Voitter</h1>
-
+          <form className={styles.profileModal_signUp}>
+            <h1 className={styles.profileModal_title}>Voitter</h1>
             <br />
             <TextField
               placeholder="username"
@@ -139,15 +129,19 @@ const ProfileModal: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+
             <Button
-              variant="contained"
+              className={styles.profileModal_btnModal}
+              variant="outlined"
               color="primary"
               type="submit"
               onClick={handleSignIn}
             >
               SignIn
             </Button>
+            <br />
             <span
+              className={styles.profileModal_btnSpan}
               onClick={async () => {
                 await dispatch(setOpenSignUp());
                 await dispatch(resetOpenSignIn());
@@ -166,11 +160,10 @@ const ProfileModal: React.FC = () => {
         style={customStyles}
       >
         {
-          <form className={styles.core_signUp}>
-            <h1 className={styles.core_title}>Voitter</h1>
+          <form className={styles.profileModal_signUp}>
+            <h1 className={styles.profileModal_title}>Voitter</h1>
 
             <br />
-
             <TextField
               placeholder="username"
               type="text"
@@ -184,26 +177,28 @@ const ProfileModal: React.FC = () => {
               hidden={true}
               onChange={(e) => setImage(e.target.files![0])}
             />
-            <br />
+
             <IconButton onClick={handlerEditPicture}>
               <MdAddPhotoAlternate />
             </IconButton>
-
             <Button
-              variant="contained"
+              className={styles.profileModal_btnModal}
+              variant="outlined"
               color="primary"
               type="submit"
               onClick={handleUpdateProfile}
             >
-              Edit
+              Update
             </Button>
+            <br />
             <span
+              className={styles.profileModal_btnSpan}
               onClick={async () => {
-                await dispatch(setOpenSignUp());
+                await dispatch(setOpenLogout());
                 await dispatch(resetOpenProfile());
               }}
             >
-              Create new Account?
+              Logout?
             </span>
           </form>
         }
@@ -216,8 +211,8 @@ const ProfileModal: React.FC = () => {
         style={customStyles}
       >
         {
-          <form className={styles.core_signUp}>
-            <h1 className={styles.core_title}>Voitter</h1>
+          <form className={styles.profileModal_signUp}>
+            <h1 className={styles.profileModal_title}>Voitter</h1>
 
             <br />
             <TextField
@@ -233,16 +228,55 @@ const ProfileModal: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button variant="contained" color="primary" onClick={handleSignUp}>
+            <Button
+              variant="outlined"
+              color="primary"
+              className={styles.profileModal_btnModal}
+              onClick={handleSignUp}
+            >
               SignUp
             </Button>
+            <br />
             <span
+              className={styles.profileModal_btnSpan}
               onClick={async () => {
                 await dispatch(setOpenSignIn());
                 await dispatch(resetOpenSignUp());
               }}
             >
               You already have an account?
+            </span>
+          </form>
+        }
+      </Modal>
+      <Modal
+        isOpen={openLogout}
+        onRequestClose={async () => {
+          await dispatch(resetOpenLogout());
+        }}
+        style={customStyles}
+      >
+        {
+          <form className={styles.profileModal_signUp}>
+            <h1 className={styles.profileModal_title}>Voitter</h1>
+
+            <br />
+            <Button
+              variant="outlined"
+              className={styles.profileModal_btnModal}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+            <br />
+            <span
+              className={styles.profileModal_btnSpan}
+              onClick={async () => {
+                await dispatch(setOpenSignUp());
+                await dispatch(resetOpenLogout());
+              }}
+            >
+              Create new Account?
             </span>
           </form>
         }
