@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 // import styles from "./Post.module.css";
@@ -35,6 +35,11 @@ interface PROPS_TIMELINE {
 // }));
 
 export const Timeline: React.FC = () => {
+  const [init, setInit] = useState(false);
+  // 初期レンダリング時のみtrueとする
+  useEffect(() => {
+    setInit(true);
+  }, []);
   const dispatch = useDispatch();
   const timelines = useSelector(selectTimeline);
   const currentTrackIndex = useSelector(selectCurrentTrackIndex);
@@ -53,16 +58,19 @@ export const Timeline: React.FC = () => {
   };
 
   const handleTrackEnd = () => {
-    if (currentTrackIndex !== timelines.length - 1) {
-      const index = currentTrackIndex + 1;
-      dispatch(setCurrentTrackIndex(index));
-    }
+    setInit(false);
+    setTimeout(() => {
+      if (currentTrackIndex !== timelines.length - 1) {
+        const index = currentTrackIndex + 1;
+        dispatch(setCurrentTrackIndex(index));
+      }
+    }, 1200); //1200ms 感覚で再生
   };
   return (
     <>
       <AudioPlayer
         src={timelines[currentTrackIndex].tweetContent.voiceUrl}
-        autoPlayAfterSrcChange={true}
+        autoPlayAfterSrcChange={init ? false : true} // timlineをselectしたタイミングで再生しないように制御
         showSkipControls={true}
         showJumpControls={false}
         onClickPrevious={() => handleClickProvious()}
