@@ -1,0 +1,16 @@
+.tweet_continerHit {
+  font-size: large;
+  cursor: pointer;
+  background-color: rgb(51, 10, 231);
+  font-size: 150%;
+  color: aliceblue;
+}
+.tweet_continerNonHit {
+  font-size: large;
+  cursor: pointer;
+}
+.tweet_time {
+  text-align: right;
+  font-size: 50%;
+  color: rgb(119, 126, 133);
+}
