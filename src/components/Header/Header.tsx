@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, ChangeEvent } from "react";
 import {
   Avatar,
   Button,
@@ -18,11 +18,15 @@ import {
   setOpenSignIn,
 } from "../Header/authSlice";
 
+import { validationInput } from "../../features/util/validation";
+
 import SearchIcon from "@mui/icons-material/Search";
 import styles from "./Header.module.css";
 
 import {
-  editTargetUsername,
+  setTimelineStart,
+  setTimelineEnd,
+  selectIsLoadingTimeline,
   selectTargetUsername,
   fetchAsyncGetTimeline,
   fetchAsyncGetUserInfo,
@@ -35,7 +39,10 @@ const Header = () => {
   const profile = useSelector(selectProfile);
   const loginUser = useSelector(selectLoginuser);
   const targetUsername = useSelector(selectTargetUsername);
+  const loading = useSelector(selectIsLoadingTimeline);
   const [checked, setChecked] = useState(false);
+  const [usernameError, setUsernameError] = useState<string | undefined>("");
+  const [isUsernameError, setIsUsernameError] = useState(false);
 
   useEffect(() => {
     const fetchBootLoader = async () => {
@@ -47,9 +54,21 @@ const Header = () => {
   }, [loginUser]);
 
   const searchTimeline = async () => {
+    dispatch(setTimelineStart());
     await dispatch(fetchAsyncGetUserInfo(searchText));
     await dispatch(fetchAsyncGetTimeline(searchText));
     await dispatch(setCurrentTrackIndex(0));
+    dispatch(setTimelineEnd());
+  };
+
+  const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const searchText = e.target.value;
+    setSearchText(searchText);
+    // error 判定のため、state更新後ではなく、validationInputの返却値を利用する
+    const localUsernameError = validationInput("username", searchText);
+    setUsernameError(localUsernameError);
+    const error = localUsernameError ? true : false;
+    setIsUsernameError(error);
   };
 
   return (
@@ -61,12 +80,17 @@ const Header = () => {
             className={styles.header_input}
             variant="outlined"
             type="text"
-            placeholder="Please Input username"
+            placeholder="Please input username after @ (@test -> test) "
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={handleUsernameChange}
+            error={isUsernameError}
+            helperText={usernameError}
           />
 
-          <IconButton onClick={searchTimeline}>
+          <IconButton
+            disabled={loading || searchText.length === 0 || isUsernameError}
+            onClick={searchTimeline}
+          >
             <SearchIcon />
           </IconButton>
         </div>
