@@ -80,6 +80,10 @@ export const timelineSlice = createSlice({
     builder.addCase(fetchAsyncGetTimeline.fulfilled, (state, action) => {
       state.timelines = action.payload;
     });
+    builder.addCase(fetchAsyncGetTimeline.rejected, (state, action) => {
+      const errorText = `Errorが発生しました: ${action.error.message}`;
+      window.alert(errorText);
+    });
     builder.addCase(
       fetchAsyncGetTimelineTranslate.fulfilled,
       (state, action) => {
@@ -88,6 +92,10 @@ export const timelineSlice = createSlice({
     );
     builder.addCase(fetchAsyncGetUserInfo.fulfilled, (state, action) => {
       state.timelineUserinfo = action.payload;
+    });
+    builder.addCase(fetchAsyncGetUserInfo.rejected, (state, action) => {
+      const errorText = `Errorが発生しました: ${action.error.message}`;
+      window.alert(errorText);
     });
   },
 });
