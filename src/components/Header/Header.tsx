@@ -87,7 +87,7 @@ const Header = () => {
           </FormGroup>
         </FormControl>
 
-        <div className="Avator">
+        <div className={styles.header_avatar}>
           <p
             onClick={() => {
               loginUser
