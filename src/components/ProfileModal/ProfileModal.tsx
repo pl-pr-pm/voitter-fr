@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import Modal from "react-modal";
 import styles from "./ProfileModal.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "../../app/store";
-
+import { validationInput } from "../../features/util/validation";
 // import { File } from "../types";
 
 import {
@@ -52,6 +52,10 @@ const ProfileModal: React.FC = () => {
   const profile = useSelector(selectProfile);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState<string | undefined>("");
+  const [passwordError, setPasswordError] = useState<string | undefined>("");
+  const [isUsernameError, setIsUsernameError] = useState(false);
+  const [isPasswordError, setIsPasswordError] = useState(false);
   const [image, setImage] = useState<File | string>("");
 
   const handlerEditPicture = () => {
@@ -72,6 +76,25 @@ const ProfileModal: React.FC = () => {
     await dispatch(fetchAsyncUpdateProf(params));
     // await dispatch(fetchCredEnd());
     await dispatch(resetOpenProfile());
+  };
+
+  const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const username = e.target.value;
+    setUsername(username);
+    // error 判定のため、state更新後ではなく、validationInputの返却値を利用する
+    const localUsernameError = validationInput("username", username);
+    setUsernameError(localUsernameError);
+    const error = localUsernameError ? true : false;
+    setIsUsernameError(error);
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    setPassword(password);
+    const localPasswordError = validationInput("password", password);
+    setPasswordError(localPasswordError);
+    const error = localPasswordError ? true : false;
+    setIsPasswordError(error);
   };
 
   const handleSignIn = (e: React.MouseEvent<HTMLElement>) => {
@@ -120,17 +143,29 @@ const ProfileModal: React.FC = () => {
               placeholder="username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleUsernameChange}
             />
 
             <TextField
               placeholder="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
             />
+            {usernameError && (
+              <p style={{ color: "red", fontSize: 8 }}>{usernameError}</p>
+            )}
+            {passwordError && (
+              <p style={{ color: "red", fontSize: 8 }}>{passwordError}</p>
+            )}
 
             <Button
+              disabled={
+                username.length === 0 ||
+                password.length === 0 ||
+                isUsernameError ||
+                isPasswordError
+              }
               className={styles.profileModal_btnModal}
               variant="outlined"
               color="primary"
@@ -168,9 +203,11 @@ const ProfileModal: React.FC = () => {
               placeholder="username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleUsernameChange}
             />
-
+            {usernameError && (
+              <p style={{ color: "red", fontSize: 8 }}>{usernameError}</p>
+            )}
             <input
               type="file"
               id="imageInput"
@@ -182,6 +219,7 @@ const ProfileModal: React.FC = () => {
               <MdAddPhotoAlternate />
             </IconButton>
             <Button
+              disabled={username.length === 0 || isUsernameError}
               className={styles.profileModal_btnModal}
               variant="outlined"
               color="primary"
@@ -219,16 +257,28 @@ const ProfileModal: React.FC = () => {
               placeholder="username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleUsernameChange}
             />
 
             <TextField
               placeholder="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
             />
+            {usernameError && (
+              <p style={{ color: "red", fontSize: 8 }}>{usernameError}</p>
+            )}
+            {passwordError && (
+              <p style={{ color: "red", fontSize: 8 }}>{passwordError}</p>
+            )}
             <Button
+              disabled={
+                username.length === 0 ||
+                password.length === 0 ||
+                isUsernameError ||
+                isPasswordError
+              }
               variant="outlined"
               color="primary"
               className={styles.profileModal_btnModal}
