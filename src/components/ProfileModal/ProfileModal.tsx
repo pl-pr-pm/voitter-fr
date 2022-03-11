@@ -11,9 +11,7 @@ import {
   selectOpenSignIn,
   selectOpenSignUp,
   resetOpenProfile,
-  selectProfile,
-  editUsername,
-  editPassword,
+  selectIsLoadingAuth,
   fetchAsyncUpdateProf,
   setOpenSignUp,
   setOpenSignIn,
@@ -25,6 +23,8 @@ import {
   setOpenLogout,
   resetOpenLogout,
   fetchAsyncLogout,
+  fetchCredStart,
+  fetchCredEnd,
 } from "../Header/authSlice";
 
 import { Button, TextField, IconButton } from "@material-ui/core";
@@ -49,7 +49,7 @@ const ProfileModal: React.FC = () => {
   const openSignIn = useSelector(selectOpenSignIn);
   const openSignUp = useSelector(selectOpenSignUp);
   const openLogout = useSelector(selectOpenLogout);
-  const profile = useSelector(selectProfile);
+  const loading = useSelector(selectIsLoadingAuth);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState<string | undefined>("");
@@ -72,9 +72,9 @@ const ProfileModal: React.FC = () => {
     }
     params.append("isImageChange", isImageChange);
 
-    // await dispatch(fetchCredStart());
+    await dispatch(fetchCredStart());
     await dispatch(fetchAsyncUpdateProf(params));
-    // await dispatch(fetchCredEnd());
+    await dispatch(fetchCredEnd());
     await dispatch(resetOpenProfile());
   };
 
@@ -101,7 +101,9 @@ const ProfileModal: React.FC = () => {
     e.preventDefault();
     const signIn = async () => {
       const packet = { username: username, password: password };
+      await dispatch(fetchCredStart());
       await dispatch(fetchAsyncLogin(packet));
+      await dispatch(fetchCredEnd());
       await dispatch(resetOpenSignIn());
     };
     signIn();
@@ -111,7 +113,9 @@ const ProfileModal: React.FC = () => {
     e.preventDefault();
     const signUp = async () => {
       const packet = { username: username, password: password };
+      await dispatch(fetchCredStart());
       await dispatch(fetchAsyncSignup(packet));
+      await dispatch(fetchCredEnd());
       await dispatch(fetchAsyncLogin(packet));
     };
     signUp();
@@ -120,7 +124,9 @@ const ProfileModal: React.FC = () => {
   const handleLogout = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const logOut = async () => {
+      await dispatch(fetchCredStart());
       await dispatch(fetchAsyncLogout());
+      await dispatch(fetchCredEnd());
       await dispatch(resetOpenLogout());
     };
     logOut();
@@ -164,7 +170,8 @@ const ProfileModal: React.FC = () => {
                 username.length === 0 ||
                 password.length === 0 ||
                 isUsernameError ||
-                isPasswordError
+                isPasswordError ||
+                loading
               }
               className={styles.profileModal_btnModal}
               variant="outlined"
@@ -219,7 +226,7 @@ const ProfileModal: React.FC = () => {
               <MdAddPhotoAlternate />
             </IconButton>
             <Button
-              disabled={username.length === 0 || isUsernameError}
+              disabled={username.length === 0 || isUsernameError || loading}
               className={styles.profileModal_btnModal}
               variant="outlined"
               color="primary"
@@ -277,7 +284,8 @@ const ProfileModal: React.FC = () => {
                 username.length === 0 ||
                 password.length === 0 ||
                 isUsernameError ||
-                isPasswordError
+                isPasswordError ||
+                loading
               }
               variant="outlined"
               color="primary"
@@ -312,6 +320,7 @@ const ProfileModal: React.FC = () => {
 
             <br />
             <Button
+              disabled={loading}
               variant="outlined"
               className={styles.profileModal_btnModal}
               onClick={handleLogout}
