@@ -100,6 +100,7 @@ const Header = () => {
               value="Translate"
               control={
                 <Switch
+                  color="primary"
                   disabled={!loginUser}
                   checked={checked}
                   onChange={() => setChecked(!checked)}
