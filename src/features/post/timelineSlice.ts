@@ -1,3 +1,4 @@
+import React from "react";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import axios from "axios";
@@ -74,16 +75,9 @@ export const timelineSlice = createSlice({
     setCurrentTrackIndex(state, action) {
       state.currentTrackIndex = action.payload;
     },
-    // setOpenNewPost(state) {
-    //   state.openNewPost = true;
-    // },
-    // resetOpenNewPost(state) {
-    //   state.openNewPost = false;
-    // },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAsyncGetTimeline.fulfilled, (state, action) => {
-      console.log(action.payload);
       state.timelines = action.payload;
     });
     builder.addCase(
@@ -93,7 +87,6 @@ export const timelineSlice = createSlice({
       }
     );
     builder.addCase(fetchAsyncGetUserInfo.fulfilled, (state, action) => {
-      console.log(action.payload);
       state.timelineUserinfo = action.payload;
     });
   },
@@ -115,5 +108,4 @@ export const selectUserInfo = (state: RootState) =>
   state.timeline.timelineUserinfo;
 export const selectCurrentTrackIndex = (state: RootState) =>
   state.timeline.currentTrackIndex;
-
 export default timelineSlice.reducer;

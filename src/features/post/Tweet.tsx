@@ -1,12 +1,7 @@
-import { Box, Paper } from "@material-ui/core";
-import React, { useCallback, useEffect, useRef } from "react";
+import { Paper } from "@material-ui/core";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setCurrentTrackIndex,
-  selectCurrentTrackIndex,
-  setCurrentRef,
-  selectCurrentRef,
-} from "./timelineSlice";
+import { setCurrentTrackIndex, selectCurrentTrackIndex } from "./timelineSlice";
 import styles from "./Tweet.module.css";
 export const Tweet: React.FC<{
   index: number;
@@ -20,31 +15,17 @@ export const Tweet: React.FC<{
 }> = ({ index, tweetText, createdAt, setRef }) => {
   const dispatch = useDispatch();
   const currentTrackIndex = useSelector(selectCurrentTrackIndex);
-  // const ref = useSelector(selectCurrentRef);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log("in callback");
-    if (index === currentTrackIndex + 2) {
+    if (index === currentTrackIndex - 3) {
       setRef(index, currentTrackIndex, ref);
     }
-    // if (index === currentTrackIndex + 1) {
-    //   setRef(ref);
-    //   console.log(ref);
-    // }
   }, [index, currentTrackIndex, ref]);
 
-  // {index !== (currentTrackIndex + 1) &&
-  //   <div ref={ref}></div>
-  // }
   return (
     <>
-      {index === currentTrackIndex + 2 ? (
-        <div id="scroll" ref={ref}></div>
-      ) : (
-        <div></div>
-      )}
-      {/* <div ref={ref}></div> */}
+      <div ref={ref}></div>
       {tweetText ? (
         <Paper
           className={
