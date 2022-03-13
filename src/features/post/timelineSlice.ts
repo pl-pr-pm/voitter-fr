@@ -4,6 +4,7 @@ import { RootState } from "../../app/store";
 import axios from "axios";
 import { PROPS_NEWPOST, PROPS_LIKED, PROPS_COMMENT } from "../types";
 
+const apiUrl = process.env.REACT_APP_DEV_API_URL;
 const apiUrlTimeline = `${process.env.REACT_APP_DEV_API_URL}timeline/`;
 const apiUrlUserinfo = `${process.env.REACT_APP_DEV_API_URL}user-info/`;
 
@@ -20,10 +21,30 @@ export const fetchAsyncGetTimeline = createAsyncThunk(
 export const fetchAsyncGetTimelineTranslate = createAsyncThunk(
   "timelineTranslate/get",
   async (username: string) => {
-    const res = await axios.get(`${apiUrlTimeline}/translate`, {
-      withCredentials: true,
-    });
-    return res.data;
+    try {
+      const res = await axios.get(
+        `${apiUrlTimeline}translate?username=${username}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return res.data;
+    } catch (e: any) {
+      // AccessTokenが期限切れた場合、refresh API を実行する
+      if (e.message.indexOf("401") !== -1) {
+        console.log("error", e.message);
+        await axios.get(`${apiUrl}auth/refresh`, {
+          withCredentials: true,
+        });
+        const res = await axios.get(
+          `${apiUrlTimeline}translate?username=${username}`,
+          {
+            withCredentials: true,
+          }
+        );
+        return res.data;
+      }
+    }
   }
 );
 
@@ -60,6 +81,7 @@ export const timelineSlice = createSlice({
       },
     ],
     currentTrackIndex: 0,
+    isTranslate: false,
   },
 
   reducers: {
@@ -74,6 +96,9 @@ export const timelineSlice = createSlice({
     },
     setCurrentTrackIndex(state, action) {
       state.currentTrackIndex = action.payload;
+    },
+    setIsTranslate(state, action) {
+      state.isTranslate = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -104,6 +129,7 @@ export const {
   setTimelineEnd,
   editTargetUsername,
   setCurrentTrackIndex,
+  setIsTranslate,
 } = timelineSlice.actions;
 
 export const selectIsLoadingTimeline = (state: RootState) =>
@@ -116,4 +142,6 @@ export const selectUserInfo = (state: RootState) =>
   state.timeline.timelineUserinfo;
 export const selectCurrentTrackIndex = (state: RootState) =>
   state.timeline.currentTrackIndex;
+export const selectIsTranslate = (state: RootState) =>
+  state.timeline.isTranslate;
 export default timelineSlice.reducer;
