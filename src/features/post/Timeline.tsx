@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import styles from "./Timeline.module.css";
 
 import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch } from "../../app/store";
 
 import {
   selectTimeline,
@@ -15,28 +14,28 @@ import {
 import { Tweet } from "./Tweet";
 import { TimelineUserInfo } from "./TimelineUserInfo";
 import { Box, Grid } from "@material-ui/core";
-interface PROPS_TIMELINE {
-  tweetText: string;
-  voiceUrl: string;
-  createdAt: string;
-}
 
 export const Timeline: React.FC = () => {
   const [init, setInit] = useState(false);
-  // 初期レンダリング時のみtrueとする
-  useEffect(() => {
-    setInit(true);
-  }, []);
   const dispatch = useDispatch();
   const timelines = useSelector(selectTimeline);
   const currentTrackIndex = useSelector(selectCurrentTrackIndex);
   const userInfo = useSelector(selectUserInfo);
+
+  // 初期レンダリング時のみtrueとする
+  useEffect(() => {
+    setInit(true);
+    console.log("run setInit");
+  }, [timelines]);
 
   const scrollToRef = (
     index: number,
     currentTrackIndex: number,
     ref: React.RefObject<HTMLDivElement>
   ) => {
+    // 画面トップにスクロールされるため、
+    // 各Tweet要素が再生された後に３つの要素が再生されたタイミングでスクロール
+    // 可能であれば、px? rem? 等で算出したいが、Tweet要素のサイズも変更するので、３という感覚的な値とする
     if (index === currentTrackIndex - 3) {
       ref && ref.current && ref.current.scrollIntoView();
     }
@@ -61,7 +60,7 @@ export const Timeline: React.FC = () => {
         const index = currentTrackIndex + 1;
         dispatch(setCurrentTrackIndex(index));
       }
-    }, 1200); //1200ms 感覚で再生
+    }, 1500); //1500ms 間隔で再生
   };
   return (
     <>
@@ -69,6 +68,7 @@ export const Timeline: React.FC = () => {
         component="div"
         className={styles.timeline_container}
         m={5}
+        mb={10}
         p={1}
         height="50%"
         justify-content="space-around"
@@ -86,7 +86,13 @@ export const Timeline: React.FC = () => {
           ))}
         </Grid>
         {userInfo.username ? (
-          <Box component="div" ml={2} width="35%" height="75%">
+          <Box
+            component="div"
+            ml={2}
+            width="35%"
+            height="75%"
+            className={styles.timeline_userinfo}
+          >
             <TimelineUserInfo />
           </Box>
         ) : (
@@ -100,6 +106,7 @@ export const Timeline: React.FC = () => {
           autoPlayAfterSrcChange={init ? false : true} // timlineをselectしたタイミングで再生しないように制御
           showSkipControls={true}
           showJumpControls={false}
+          showDownloadProgress={true}
           onClickPrevious={() => handleClickProvious()}
           onClickNext={() => handleClickNext()}
           onEnded={() => handleTrackEnd()}

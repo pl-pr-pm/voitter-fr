@@ -3,6 +3,9 @@
   z-index: -1;
 }
 
+.timeline_userinfo {
+}
+
 .timeilne_player {
   position: fixed;
   bottom: 0;
