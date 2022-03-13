@@ -1,9 +1,7 @@
 .tweet_continerHit {
   font-size: large;
   cursor: pointer;
-  /* background-color: rgb(231, 73, 10); */
   font-size: 150%;
-  color: aliceblue;
   padding: 1%;
 }
 .tweet_continerNonHit {
