@@ -35,7 +35,7 @@ import {
   setIsTranslate,
   selectIsTranslate,
   setUntilId,
-} from "../../features/post/timelineSlice";
+} from "../../features/timeline/timelineSlice";
 
 const Header = () => {
   const [searchText, setSearchText] = useState("");

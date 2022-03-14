@@ -3,7 +3,12 @@
   z-index: -1;
 }
 
-.timeline_userinfo {
+.timeline_progress {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50%;
 }
 
 .timeilne_player {

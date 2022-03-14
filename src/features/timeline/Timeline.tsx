@@ -11,11 +11,14 @@ import {
   setCurrentTrackIndex,
   selectUserInfo,
   selectUntilId,
+  selectIsTranslate,
   fetchAsyncGetTimeline,
+  fetchAsyncGetTimelineTranslate,
+  selectIsLoadingTimeline,
 } from "./timelineSlice";
 import { Tweet } from "./Tweet";
 import { TimelineUserInfo } from "./TimelineUserInfo";
-import { Box, Grid } from "@material-ui/core";
+import { Box, Grid, CircularProgress } from "@material-ui/core";
 
 export const Timeline: React.FC = () => {
   const [init, setInit] = useState(false);
@@ -24,11 +27,12 @@ export const Timeline: React.FC = () => {
   const currentTrackIndex = useSelector(selectCurrentTrackIndex);
   const userInfo = useSelector(selectUserInfo);
   const untilId = useSelector(selectUntilId);
+  const isTranslate = useSelector(selectIsTranslate);
+  const isLoading = useSelector(selectIsLoadingTimeline);
 
   // 初期レンダリング時のみtrueとする
   useEffect(() => {
     setInit(true);
-    console.log("run setInit");
   }, [timelines]);
 
   const scrollToRef = (
@@ -67,54 +71,76 @@ export const Timeline: React.FC = () => {
       // バックエンド側で、S3にアップロード後、複数の地点にレプリケーションするため、バックエンド側ではオブジェクトを作成できていても、クライアント側でアクセスすると未作成で403となる
       // 余裕を持って、この数字とした
       if (currentTrackIndex === timelines.length - 4) {
-        // 追加のtimelinesを取得する
-        dispatch(
-          fetchAsyncGetTimeline({
-            username: userInfo.username,
-            untilId: untilId,
-          })
-        );
+        if (isTranslate) {
+          // 追加のtimelinesを取得する
+          dispatch(
+            fetchAsyncGetTimelineTranslate({
+              username: userInfo.username,
+              untilId: untilId,
+            })
+          );
+        } else {
+          dispatch(
+            fetchAsyncGetTimeline({
+              username: userInfo.username,
+              untilId: untilId,
+            })
+          );
+        }
       }
     }, 1500); //1500ms 間隔で再生
   };
   return (
     <>
-      <Box
-        component="div"
-        className={styles.timeline_container}
-        m={5}
-        mb={10}
-        p={1}
-        height="50%"
-        justify-content="space-around"
-      >
-        <Grid container direction="column" justifyContent="center" spacing={2}>
-          {timelines.map((timeline, index) => (
-            <Grid item>
-              <Tweet
-                index={index}
-                tweetText={timeline.tweetContent.tweetText}
-                createdAt={timeline.tweetContent.createdAt}
-                setRef={scrollToRef}
-              />
-            </Grid>
-          ))}
-        </Grid>
-        {userInfo.username ? (
-          <Box
-            component="div"
-            ml={2}
-            width="35%"
-            height="75%"
-            className={styles.timeline_userinfo}
-          >
-            <TimelineUserInfo />
+      {isLoading ? (
+        <>
+          <Box className={styles.timeline_progress}>
+            <CircularProgress />
           </Box>
-        ) : (
-          <div></div>
-        )}
-      </Box>
+        </>
+      ) : (
+        <Box
+          component="div"
+          className={styles.timeline_container}
+          m={5}
+          mb={10}
+          p={1}
+          height="50%"
+          justify-content="space-around"
+        >
+          <Grid
+            container
+            direction="column"
+            justifyContent="center"
+            spacing={2}
+          >
+            {timelines.map((timeline, index) => (
+              <Grid item>
+                <Tweet
+                  index={index}
+                  tweetText={timeline.tweetContent.tweetText}
+                  createdAt={timeline.tweetContent.createdAt}
+                  setRef={scrollToRef}
+                />
+              </Grid>
+            ))}
+          </Grid>
 
+          {userInfo.username ? (
+            <Box
+              component="div"
+              ml={2}
+              width="35%"
+              height="75%"
+              className={styles.timeline_userinfo}
+            >
+              <TimelineUserInfo />
+            </Box>
+          ) : (
+            <div></div>
+          )}
+        </Box>
+      )}
       <Box className={styles.timeilne_player}>
         <AudioPlayer
           src={timelines[currentTrackIndex].tweetContent.voiceUrl}

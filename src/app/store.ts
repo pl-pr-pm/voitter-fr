@@ -1,7 +1,7 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 
 import authReducer from "../components/Header/authSlice";
-import timelineReducer from "../features/post/timelineSlice";
+import timelineReducer from "../features/timeline/timelineSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,

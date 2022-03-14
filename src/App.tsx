@@ -1,8 +1,13 @@
 import React from "react";
-import "./App.css";
+import styles from "./App.module.css";
+import Core from "./features/core/Core";
 
 function App() {
-  return <div className="App"></div>;
+  return (
+    <div>
+      <Core />
+    </div>
+  );
 }
 
 export default App;
