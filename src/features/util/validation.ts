@@ -2,12 +2,12 @@ const usernameValidation = (username: string) => {
   if (!username) {
     return "文字を入力してください";
   }
-  const usernameRegExp = /^[a-zA-Z0-9]*$/;
+  const usernameRegExp = /^[a-zA-Z0-9_]*$/;
   if (!(username.length >= 4 && username.length <= 50)) {
     return "長さが不正です。4文字以上50文字以下としてください";
   }
   if (!username.match(usernameRegExp)) {
-    return "書式が不正です。半角英数字のみとしてください";
+    return "書式が不正です。半角英数字記号としてください。記号は_のみ";
   }
   return "";
 };
