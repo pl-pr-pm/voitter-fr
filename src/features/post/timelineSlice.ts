@@ -1,8 +1,6 @@
-import React from "react";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import axios from "axios";
-import { PROPS_NEWPOST, PROPS_LIKED, PROPS_COMMENT } from "../types";
 
 const apiUrl = process.env.REACT_APP_DEV_API_URL;
 const apiUrlTimeline = `${process.env.REACT_APP_DEV_API_URL}timeline/`;
@@ -149,7 +147,17 @@ export const timelineSlice = createSlice({
     builder.addCase(
       fetchAsyncGetTimelineTranslate.fulfilled,
       (state, action) => {
-        state.timelines = action.payload;
+        const addTimeline = action.payload;
+        // 初回リクエストの場合、timelinesを新規作成
+        // 初回以降は、timelinesを追加する
+        if (state.untilId === "0000000000") {
+          state.timelines = addTimeline;
+        } else {
+          const newTimelines = state.timelines.concat(addTimeline);
+          state.timelines = newTimelines;
+        }
+        // 最後の要素のtweetIdが最古のtweetIdとなっている
+        state.untilId = addTimeline[addTimeline.length - 1].tweetId;
       }
     );
     builder.addCase(fetchAsyncGetUserInfo.fulfilled, (state, action) => {
@@ -175,7 +183,6 @@ export const selectIsLoadingTimeline = (state: RootState) =>
   state.timeline.isLoadingTimeline;
 export const selectTargetUsername = (state: RootState) =>
   state.timeline.targetUsername;
-// export const selectOpenNewTimeline = (state: RootState) => state.post.openNewPost;
 export const selectTimeline = (state: RootState) => state.timeline.timelines;
 export const selectUserInfo = (state: RootState) =>
   state.timeline.timelineUserinfo;
