@@ -8,22 +8,32 @@ const apiUrl = process.env.REACT_APP_DEV_API_URL;
 const apiUrlTimeline = `${process.env.REACT_APP_DEV_API_URL}timeline/`;
 const apiUrlUserinfo = `${process.env.REACT_APP_DEV_API_URL}user-info/`;
 
+type PROPS_TIMELINE = {
+  username: string;
+  untilId: string;
+};
+
 export const fetchAsyncGetTimeline = createAsyncThunk(
   "timeline/get",
-  async (username: string) => {
-    const res = await axios.get(`${apiUrlTimeline}?username=${username}`, {
-      withCredentials: true,
-    });
+  async (propsTimeline: PROPS_TIMELINE) => {
+    const { username, untilId } = propsTimeline;
+    const res = await axios.get(
+      `${apiUrlTimeline}?username=${username}&untilId=${untilId}`,
+      {
+        withCredentials: true,
+      }
+    );
     return res.data;
   }
 );
 
 export const fetchAsyncGetTimelineTranslate = createAsyncThunk(
   "timelineTranslate/get",
-  async (username: string) => {
+  async (propsTimeline: PROPS_TIMELINE) => {
+    const { username, untilId } = propsTimeline;
     try {
       const res = await axios.get(
-        `${apiUrlTimeline}translate?username=${username}`,
+        `${apiUrlTimeline}translate?username=${username}&untilId=${untilId}`,
         {
           withCredentials: true,
         }
@@ -37,7 +47,7 @@ export const fetchAsyncGetTimelineTranslate = createAsyncThunk(
           withCredentials: true,
         });
         const res = await axios.get(
-          `${apiUrlTimeline}translate?username=${username}`,
+          `${apiUrlTimeline}translate?username=${username}&untilId=${untilId}`,
           {
             withCredentials: true,
           }
@@ -82,9 +92,23 @@ export const timelineSlice = createSlice({
     ],
     currentTrackIndex: 0,
     isTranslate: false,
+    untilId: "0000000000",
   },
 
   reducers: {
+    refreshTimelines(state) {
+      state.timelines = [
+        {
+          _id: "",
+          tweetContent: {
+            tweetText: "",
+            createdAt: "",
+            voiceUrl: "",
+          },
+          username: "",
+        },
+      ];
+    },
     setTimelineStart(state) {
       state.isLoadingTimeline = true;
     },
@@ -100,10 +124,23 @@ export const timelineSlice = createSlice({
     setIsTranslate(state, action) {
       state.isTranslate = action.payload;
     },
+    setUntilId(state, action) {
+      state.untilId = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAsyncGetTimeline.fulfilled, (state, action) => {
-      state.timelines = action.payload;
+      const addTimeline = action.payload;
+      // 初回リクエストの場合、timelinesを新規作成
+      // 初回以降は、timelinesを追加する
+      if (state.untilId === "0000000000") {
+        state.timelines = addTimeline;
+      } else {
+        const newTimelines = state.timelines.concat(addTimeline);
+        state.timelines = newTimelines;
+      }
+      // 最後の要素のtweetIdが最古のtweetIdとなっている
+      state.untilId = addTimeline[addTimeline.length - 1].tweetId;
     });
     builder.addCase(fetchAsyncGetTimeline.rejected, (state, action) => {
       const errorText = `Errorが発生しました: ${action.error.message}`;
@@ -125,11 +162,13 @@ export const timelineSlice = createSlice({
   },
 });
 export const {
+  refreshTimelines,
   setTimelineStart,
   setTimelineEnd,
   editTargetUsername,
   setCurrentTrackIndex,
   setIsTranslate,
+  setUntilId,
 } = timelineSlice.actions;
 
 export const selectIsLoadingTimeline = (state: RootState) =>
@@ -144,4 +183,5 @@ export const selectCurrentTrackIndex = (state: RootState) =>
   state.timeline.currentTrackIndex;
 export const selectIsTranslate = (state: RootState) =>
   state.timeline.isTranslate;
+export const selectUntilId = (state: RootState) => state.timeline.untilId;
 export default timelineSlice.reducer;

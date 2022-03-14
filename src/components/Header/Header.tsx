@@ -31,6 +31,10 @@ import {
   fetchAsyncGetTimeline,
   fetchAsyncGetUserInfo,
   setCurrentTrackIndex,
+  fetchAsyncGetTimelineTranslate,
+  setIsTranslate,
+  selectIsTranslate,
+  setUntilId,
 } from "../../features/post/timelineSlice";
 
 const Header = () => {
@@ -40,7 +44,8 @@ const Header = () => {
   const loginUser = useSelector(selectLoginuser);
   const targetUsername = useSelector(selectTargetUsername);
   const loading = useSelector(selectIsLoadingTimeline);
-  const [checked, setChecked] = useState(false);
+  // const [isTranslate, setIsTranslate] = useState(false);
+  const isTranslate = useSelector(selectIsTranslate);
   const [usernameError, setUsernameError] = useState<string | undefined>("");
   const [isUsernameError, setIsUsernameError] = useState(false);
 
@@ -54,9 +59,27 @@ const Header = () => {
   }, [loginUser]);
 
   const searchTimeline = async () => {
+    // 別ユーザーのtimelinesを取得するため、untilIdとcurrentindexを初期状態とする
+    const firstFetchUntilId = "0000000000";
+    dispatch(setUntilId(firstFetchUntilId));
     dispatch(setTimelineStart());
+    dispatch(setCurrentTrackIndex(0));
     await dispatch(fetchAsyncGetUserInfo(searchText));
-    await dispatch(fetchAsyncGetTimeline(searchText));
+    if (isTranslate) {
+      await dispatch(
+        fetchAsyncGetTimelineTranslate({
+          username: searchText,
+          untilId: firstFetchUntilId,
+        })
+      );
+    } else {
+      await dispatch(
+        fetchAsyncGetTimeline({
+          username: searchText,
+          untilId: firstFetchUntilId,
+        })
+      );
+    }
     await dispatch(setCurrentTrackIndex(0));
     dispatch(setTimelineEnd());
   };
@@ -102,8 +125,8 @@ const Header = () => {
                 <Switch
                   color="primary"
                   disabled={!loginUser}
-                  checked={checked}
-                  onChange={() => setChecked(!checked)}
+                  checked={isTranslate}
+                  onChange={() => dispatch(setIsTranslate(!isTranslate))}
                 />
               }
               label="TRANSLATE"

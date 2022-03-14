@@ -10,6 +10,8 @@ import {
   selectCurrentTrackIndex,
   setCurrentTrackIndex,
   selectUserInfo,
+  selectUntilId,
+  fetchAsyncGetTimeline,
 } from "./timelineSlice";
 import { Tweet } from "./Tweet";
 import { TimelineUserInfo } from "./TimelineUserInfo";
@@ -21,6 +23,7 @@ export const Timeline: React.FC = () => {
   const timelines = useSelector(selectTimeline);
   const currentTrackIndex = useSelector(selectCurrentTrackIndex);
   const userInfo = useSelector(selectUserInfo);
+  const untilId = useSelector(selectUntilId);
 
   // 初期レンダリング時のみtrueとする
   useEffect(() => {
@@ -59,6 +62,18 @@ export const Timeline: React.FC = () => {
       if (currentTrackIndex !== timelines.length - 1) {
         const index = currentTrackIndex + 1;
         dispatch(setCurrentTrackIndex(index));
+      }
+      // この値は感覚
+      // バックエンド側で、S3にアップロード後、複数の地点にレプリケーションするため、バックエンド側ではオブジェクトを作成できていても、クライアント側でアクセスすると未作成で403となる
+      // 余裕を持って、この数字とした
+      if (currentTrackIndex === timelines.length - 4) {
+        // 追加のtimelinesを取得する
+        dispatch(
+          fetchAsyncGetTimeline({
+            username: userInfo.username,
+            untilId: untilId,
+          })
+        );
       }
     }, 1500); //1500ms 間隔で再生
   };
