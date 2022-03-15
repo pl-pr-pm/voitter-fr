@@ -25,7 +25,7 @@ import {
   fetchAsyncLogout,
   fetchCredStart,
   fetchCredEnd,
-} from "../Header/authSlice";
+} from "../../features/auth/authSlice";
 
 import { Button, TextField, IconButton } from "@material-ui/core";
 import { MdAddPhotoAlternate } from "react-icons/md";

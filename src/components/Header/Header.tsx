@@ -16,7 +16,7 @@ import {
   selectProfile,
   fetchAsyncGetProf,
   setOpenSignIn,
-} from "../Header/authSlice";
+} from "../../features/auth/authSlice";
 
 import { validationInput } from "../../features/util/validation";
 
