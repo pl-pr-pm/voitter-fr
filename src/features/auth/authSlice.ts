@@ -9,6 +9,16 @@ type PROPS_SIGNINUP_AUTHEN = {
 
 const apiUrl = process.env.REACT_APP_DEV_API_URL;
 
+const authJudgeError = (method: string, errorMessage: string, arg: any) => {
+  let errorText = "";
+  if (errorMessage.includes("401")) {
+    errorText = `${method}に失敗しました。ユーザーとパスワードを確認してください。`;
+  } else if (errorMessage.includes("530")) {
+    errorText = `既に登録されているユーザーです。`;
+  }
+  window.alert(errorText);
+};
+
 export const fetchAsyncSignup = createAsyncThunk(
   "auth/signup", //action name
   async (authen: PROPS_SIGNINUP_AUTHEN) => {
@@ -184,8 +194,13 @@ export const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAsyncSignup.rejected, (state, action) => {
-      const errorText = `Errorが発生しました: ${action.error.message}`;
-      window.alert(errorText);
+      console.log(action.error);
+      if (action.error.stack) {
+        authJudgeError("SignUp", action.error.stack!, action.meta.arg);
+      } else {
+        const errorText = `Errorが発生しました: ${action.error.message}`;
+        window.alert(errorText);
+      }
     });
 
     builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
@@ -193,8 +208,13 @@ export const authSlice = createSlice({
     });
 
     builder.addCase(fetchAsyncLogin.rejected, (state, action) => {
-      const errorText = `Errorが発生しました: ${action.error.message}`;
-      window.alert(errorText);
+      console.log(action.error);
+      if (action.error.stack) {
+        authJudgeError("Login", action.error.stack!, action.meta.arg);
+      } else {
+        const errorText = `Errorが発生しました: ${action.error.message}`;
+        window.alert(errorText);
+      }
     });
 
     builder.addCase(fetchAsyncLogout.fulfilled, (state, action) => {
