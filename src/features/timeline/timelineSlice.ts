@@ -11,6 +11,22 @@ type PROPS_TIMELINE = {
   untilId: string;
 };
 
+const userInfoJudgeError = (errorMessage: string, arg: any) => {
+  let errorText = "";
+  if (errorMessage.includes("513") || errorMessage.includes("516")) {
+    errorText = `対象のユーザーが見つかりませんでした: ${arg}`;
+  } else {
+    errorText = `Errorが発生しました: ${errorMessage}`;
+  }
+  window.alert(errorText);
+};
+
+const timelineJudgeError = (errorMessage: string, arg: any) => {
+  if (!(errorMessage.includes("513") || errorMessage.includes("516"))) {
+    window.alert(`Errorが発生しました: ${errorMessage}`);
+  }
+};
+
 export const fetchAsyncGetTimeline = createAsyncThunk(
   "timeline/get",
   async (propsTimeline: PROPS_TIMELINE) => {
@@ -141,8 +157,26 @@ export const timelineSlice = createSlice({
       state.untilId = addTimeline[addTimeline.length - 1].tweetId;
     });
     builder.addCase(fetchAsyncGetTimeline.rejected, (state, action) => {
-      const errorText = `Errorが発生しました: ${action.error.message}`;
-      window.alert(errorText);
+      console.log(action.error?.stack);
+      // 現在表示されているタイムラインを初期化する
+      state.timelines = [
+        {
+          _id: "",
+          tweetContent: {
+            tweetText: "",
+            createdAt: "",
+            voiceUrl: "",
+          },
+          username: "",
+        },
+      ];
+
+      if (action.error.message) {
+        timelineJudgeError(action.error.message!, action.meta.arg);
+      } else {
+        const errorText = `Errorが発生しました: ${action.error.message}`;
+        window.alert(errorText);
+      }
     });
     builder.addCase(
       fetchAsyncGetTimelineTranslate.fulfilled,
@@ -160,12 +194,46 @@ export const timelineSlice = createSlice({
         state.untilId = addTimeline[addTimeline.length - 1].tweetId;
       }
     );
+    builder.addCase(
+      fetchAsyncGetTimelineTranslate.rejected,
+      (state, action) => {
+        // 現在表示されているタイムラインを初期化する
+        state.timelines = [
+          {
+            _id: "",
+            tweetContent: {
+              tweetText: "",
+              createdAt: "",
+              voiceUrl: "",
+            },
+            username: "",
+          },
+        ];
+        console.log(action.error?.stack);
+        if (action.error.message) {
+          timelineJudgeError(action.error.message!, action.meta.arg);
+        } else {
+          const errorText = `Errorが発生しました: ${action.error.message}`;
+          window.alert(errorText);
+        }
+      }
+    );
     builder.addCase(fetchAsyncGetUserInfo.fulfilled, (state, action) => {
       state.timelineUserinfo = action.payload;
     });
     builder.addCase(fetchAsyncGetUserInfo.rejected, (state, action) => {
-      const errorText = `Errorが発生しました: ${action.error.message}`;
-      window.alert(errorText);
+      state.timelineUserinfo = {
+        username: "",
+        description: "",
+        profile_image_url: "",
+      };
+
+      if (action.error.message) {
+        userInfoJudgeError(action.error.message!, action.meta.arg);
+      } else {
+        const errorText = `Errorが発生しました: ${action.error.message}`;
+        window.alert(errorText);
+      }
     });
   },
 });
