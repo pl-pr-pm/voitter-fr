@@ -119,7 +119,7 @@ export const Timeline: React.FC = () => {
             spacing={2}
           >
             {timelines.map((timeline, index) => (
-              <Grid item>
+              <Grid item key={index}>
                 <Tweet
                   index={index}
                   tweetText={timeline.tweetContent.tweetText}
