@@ -67,29 +67,33 @@ export const Timeline: React.FC = () => {
         const index = currentTrackIndex + 1;
         dispatch(setCurrentTrackIndex(index));
       }
-      // この値は感覚
-      // バックエンド側で、S3にアップロード後、複数の地点にレプリケーションするため、バックエンド側ではオブジェクトを作成できていても、クライアント側でアクセスすると未作成で403となる
-      // 余裕を持って、この数字とした
-      if (currentTrackIndex === timelines.length - 4) {
-        if (isTranslate) {
-          // 追加のtimelinesを取得する
-          dispatch(
-            fetchAsyncGetTimelineTranslate({
-              username: userInfo.username,
-              untilId: untilId,
-            })
-          );
-        } else {
-          dispatch(
-            fetchAsyncGetTimeline({
-              username: userInfo.username,
-              untilId: untilId,
-            })
-          );
-        }
-      }
-    }, 1500); //1500ms 間隔で再生
+    }, 2000); //2000ms 間隔で再生
   };
+
+  const handlePlay = () => {
+    // この値は感覚
+    // バックエンド側で、S3にアップロード後、複数の地点にレプリケーションするため、バックエンド側ではオブジェクトを作成できていても、クライアント側でアクセスすると未作成で403となる
+    // 余裕を持って、この数字とした
+    if (currentTrackIndex === timelines.length - 4) {
+      if (isTranslate) {
+        // 追加のtimelinesを取得する
+        dispatch(
+          fetchAsyncGetTimelineTranslate({
+            username: userInfo.username,
+            untilId: untilId,
+          })
+        );
+      } else {
+        dispatch(
+          fetchAsyncGetTimeline({
+            username: userInfo.username,
+            untilId: untilId,
+          })
+        );
+      }
+    }
+  };
+
   return (
     <>
       {isLoading ? (
@@ -151,6 +155,7 @@ export const Timeline: React.FC = () => {
           onClickPrevious={() => handleClickProvious()}
           onClickNext={() => handleClickNext()}
           onEnded={() => handleTrackEnd()}
+          onPlay={() => handlePlay()}
         />
       </Box>
     </>
