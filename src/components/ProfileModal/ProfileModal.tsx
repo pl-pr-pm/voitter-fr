@@ -4,7 +4,6 @@ import styles from "./ProfileModal.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "../../app/store";
 import { validationInput } from "../../features/util/validation";
-// import { File } from "../types";
 
 import {
   selectOpenProfile,
@@ -114,9 +113,17 @@ const ProfileModal: React.FC = () => {
     const signUp = async () => {
       const packet = { username: username, password: password };
       await dispatch(fetchCredStart());
-      await dispatch(fetchAsyncSignup(packet));
-      await dispatch(fetchCredEnd());
-      await dispatch(fetchAsyncLogin(packet));
+      try {
+        await dispatch(fetchAsyncSignup(packet));
+      } catch (e: any) {
+        await dispatch(fetchCredEnd());
+        await dispatch(resetOpenSignUp());
+      }
+      if (!e) {
+        await dispatch(fetchCredEnd());
+        await dispatch(fetchAsyncLogin(packet));
+        await dispatch(resetOpenSignUp());
+      }
     };
     signUp();
   };

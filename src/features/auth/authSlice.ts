@@ -201,6 +201,7 @@ export const authSlice = createSlice({
         const errorText = `Errorが発生しました: ${action.error.message}`;
         window.alert(errorText);
       }
+      throw new Error();
     });
 
     builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
@@ -210,7 +211,7 @@ export const authSlice = createSlice({
     builder.addCase(fetchAsyncLogin.rejected, (state, action) => {
       console.log(action.error);
       if (action.error.stack) {
-        authJudgeError("Login", action.error.stack!, action.meta.arg);
+        authJudgeError("Signin", action.error.stack!, action.meta.arg);
       } else {
         const errorText = `Errorが発生しました: ${action.error.message}`;
         window.alert(errorText);
