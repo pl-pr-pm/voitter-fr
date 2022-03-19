@@ -28,6 +28,11 @@
   width: 75%;
 }
 
+.header_tooltip {
+  display: flex;
+  align-items: center;
+}
+
 .header_switch {
   margin-right: 3%;
 }

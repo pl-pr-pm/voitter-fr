@@ -5,11 +5,14 @@ import {
   IconButton,
   TextField,
   Switch,
-  FormGroup,
-  FormControlLabel,
-  FormControl,
+  Tooltip,
 } from "@material-ui/core";
+
+import SearchIcon from "@mui/icons-material/Search";
+import TranslateIcon from "@mui/icons-material/Translate";
+
 import { useSelector, useDispatch } from "react-redux";
+
 import {
   selectLoginuser,
   setOpenProfile,
@@ -18,16 +21,10 @@ import {
   setOpenSignIn,
 } from "../../features/auth/authSlice";
 
-import { validationInput } from "../../features/util/validation";
-
-import SearchIcon from "@mui/icons-material/Search";
-import styles from "./Header.module.css";
-
 import {
   setTimelineStart,
   setTimelineEnd,
   selectIsLoadingTimeline,
-  selectTargetUsername,
   fetchAsyncGetTimeline,
   fetchAsyncGetUserInfo,
   setCurrentTrackIndex,
@@ -37,17 +34,20 @@ import {
   setUntilId,
 } from "../../features/timeline/timelineSlice";
 
+import { validationInput } from "../../features/util/validation";
+
+import styles from "./Header.module.css";
+
 const Header = () => {
   const [searchText, setSearchText] = useState("");
   const dispatch = useDispatch();
   const profile = useSelector(selectProfile);
   const loginUser = useSelector(selectLoginuser);
-  const targetUsername = useSelector(selectTargetUsername);
   const loading = useSelector(selectIsLoadingTimeline);
-  // const [isTranslate, setIsTranslate] = useState(false);
   const isTranslate = useSelector(selectIsTranslate);
   const [usernameError, setUsernameError] = useState<string | undefined>("");
   const [isUsernameError, setIsUsernameError] = useState(false);
+  const [translateMessage, setTranslateMessage] = useState("");
 
   useEffect(() => {
     const fetchBootLoader = async () => {
@@ -57,6 +57,20 @@ const Header = () => {
     };
     fetchBootLoader();
   }, [loginUser]);
+
+  useEffect(() => {
+    if (!loginUser) {
+      setTranslateMessage(
+        "タイムライン検索時、対象のユーザのツイートを日本語に翻訳します。ログイン後、翻訳機能の使用が可能となります。"
+      );
+    } else {
+      if (!isTranslate) {
+        setTranslateMessage("日本語への翻訳可能");
+      } else {
+        setTranslateMessage("日本語への翻訳有効中");
+      }
+    }
+  }, [loginUser, isTranslate]);
 
   const searchTimeline = async () => {
     // 別ユーザーのtimelinesを取得するため、untilIdとcurrentindexを初期状態とする
@@ -103,7 +117,7 @@ const Header = () => {
             className={styles.header_input}
             variant="outlined"
             type="text"
-            placeholder="Please input username after @ (@test -> test) "
+            placeholder="Please input username after @ (@999voitter -> 999voitter) "
             value={searchText}
             onChange={handleUsernameChange}
             error={isUsernameError}
@@ -117,23 +131,19 @@ const Header = () => {
             <SearchIcon />
           </IconButton>
         </div>
-        <FormControl component="fieldset" className={styles.header_switch}>
-          <FormGroup aria-label="position" row>
-            <FormControlLabel
-              value="Translate"
-              control={
-                <Switch
-                  color="primary"
-                  disabled={!loginUser}
-                  checked={isTranslate}
-                  onChange={() => dispatch(setIsTranslate(!isTranslate))}
-                />
-              }
-              label="TRANSLATE"
-              labelPlacement="start"
-            />
-          </FormGroup>
-        </FormControl>
+        <div>
+          <Tooltip title={translateMessage}>
+            <div className={styles.header_tooltip}>
+              <TranslateIcon />
+              <Switch
+                color="primary"
+                disabled={!loginUser}
+                checked={isTranslate}
+                onChange={() => dispatch(setIsTranslate(!isTranslate))}
+              />
+            </div>
+          </Tooltip>
+        </div>
 
         <div className={styles.header_avatar}>
           <p
