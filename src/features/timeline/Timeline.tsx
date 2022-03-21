@@ -15,6 +15,7 @@ import {
   fetchAsyncGetTimeline,
   fetchAsyncGetTimelineTranslate,
   selectIsLoadingTimeline,
+  selectIsEmptyTimeline,
 } from "./timelineSlice";
 import { Tweet } from "./Tweet";
 import { TimelineUserInfo } from "./TimelineUserInfo";
@@ -22,6 +23,8 @@ import { Box, Grid, CircularProgress } from "@material-ui/core";
 
 export const Timeline: React.FC = () => {
   const [init, setInit] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [voiceIsLoading, setVoiceIsLoading] = useState(false);
   const dispatch = useDispatch();
   const timelines = useSelector(selectTimeline);
   const currentTrackIndex = useSelector(selectCurrentTrackIndex);
@@ -29,6 +32,7 @@ export const Timeline: React.FC = () => {
   const untilId = useSelector(selectUntilId);
   const isTranslate = useSelector(selectIsTranslate);
   const isLoading = useSelector(selectIsLoadingTimeline);
+  const isEmptyTimeline = useSelector(selectIsEmptyTimeline);
 
   // 初期レンダリング時のみtrueとする
   useEffect(() => {
@@ -94,6 +98,28 @@ export const Timeline: React.FC = () => {
     }
   };
 
+  const handleOnError = () => {
+    const originalIndex = currentTrackIndex;
+    setLoadError(true);
+    setVoiceIsLoading(true);
+    // 以下、ダサいが・・・
+    // S3に作成されたpollyのmp3ファイルがS3によってレプリケーションされるため、作成後すぐに取得することができない
+    // そのため、mp3の再生を試みるとエラーとなる
+    // react-h5-audio-playerには、再生失敗時のリトライ機能は備わっていないため以下自作している
+    // 設定で、srcの変更時に自動再生としており、これを利用しsrcのindexを一時的に変更し元に戻すことで、mp3取得処理再実施する
+    setTimeout(() => {
+      dispatch(setCurrentTrackIndex(1));
+      dispatch(setCurrentTrackIndex(originalIndex));
+      setVoiceIsLoading(false);
+    }, 5000);
+  };
+
+  const handleOnLoaded = () => {
+    if (loadError) {
+      setLoadError(false);
+    }
+  };
+
   return (
     <>
       {isLoading ? (
@@ -128,6 +154,19 @@ export const Timeline: React.FC = () => {
                 />
               </Grid>
             ))}
+
+            {/* 対象ユーザーのtimelineが一件も取得できなかった場合 */}
+            {isEmptyTimeline && timelines[0]._id === "" && (
+              <p style={{ color: "indianred" }}>
+                Tweetは取得できませんでした。対象ユーザーのTweetが存在するか確認してください。
+              </p>
+            )}
+            {/* 対象ユーザーのtimelineが追加で取得できない場合 */}
+            {isEmptyTimeline && timelines[0]._id !== "" && (
+              <p style={{ color: "greenyellow", textAlign: "center" }}>
+                最後のTweetです
+              </p>
+            )}
           </Grid>
 
           {userInfo.username ? (
@@ -145,18 +184,33 @@ export const Timeline: React.FC = () => {
           )}
         </Box>
       )}
+
       <Box className={styles.timeilne_player}>
-        <AudioPlayer
-          src={timelines[currentTrackIndex].tweetContent.voiceUrl}
-          autoPlayAfterSrcChange={init ? false : true} // timlineをselectしたタイミングで再生しないように制御
-          showSkipControls={true}
-          showJumpControls={false}
-          showDownloadProgress={true}
-          onClickPrevious={() => handleClickProvious()}
-          onClickNext={() => handleClickNext()}
-          onEnded={() => handleTrackEnd()}
-          onPlay={() => handlePlay()}
-        />
+        {loadError && (
+          <p style={{ color: "red" }}>
+            音声読み込み中です。何度か再生ボタンをクリックしてください。
+          </p>
+        )}
+        {voiceIsLoading ? (
+          <Box className={styles.timeline_voice_progress}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <AudioPlayer
+            src={timelines[currentTrackIndex].tweetContent.voiceUrl}
+            autoPlayAfterSrcChange={init || isLoading ? false : true} // timlineをselectしたタイミングで再生しないように制御
+            showSkipControls={true}
+            showJumpControls={false}
+            showDownloadProgress={true}
+            volume={0.5}
+            onClickPrevious={() => handleClickProvious()}
+            onClickNext={() => handleClickNext()}
+            onEnded={() => handleTrackEnd()}
+            onPlay={() => handlePlay()}
+            onPlayError={() => handleOnError()}
+            onLoadedData={() => handleOnLoaded()}
+          />
+        )}
       </Box>
     </>
   );

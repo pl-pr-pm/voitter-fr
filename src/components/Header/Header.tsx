@@ -32,6 +32,7 @@ import {
   setIsTranslate,
   selectIsTranslate,
   setUntilId,
+  resetIsEmptyTimeline,
 } from "../../features/timeline/timelineSlice";
 
 import { validationInput } from "../../features/util/validation";
@@ -75,6 +76,8 @@ const Header = () => {
   const searchTimeline = async () => {
     // 別ユーザーのtimelinesを取得するため、untilIdとcurrentindexを初期状態とする
     const firstFetchUntilId = "0000000000";
+    // isEmptyTimelineをfalseとし、timelineの末尾でのメッセージ出力を抑える
+    dispatch(resetIsEmptyTimeline());
     dispatch(setUntilId(firstFetchUntilId));
     dispatch(setTimelineStart());
     dispatch(setCurrentTrackIndex(0));

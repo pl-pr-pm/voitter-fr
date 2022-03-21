@@ -22,7 +22,13 @@ const userInfoJudgeError = (errorMessage: string, arg: any) => {
 };
 
 const timelineJudgeError = (errorMessage: string, arg: any) => {
-  if (!(errorMessage.includes("513") || errorMessage.includes("516"))) {
+  if (
+    !(
+      errorMessage.includes("513") ||
+      errorMessage.includes("515") ||
+      errorMessage.includes("516")
+    )
+  ) {
     window.alert(`Errorが発生しました: ${errorMessage}`);
   }
 };
@@ -107,6 +113,7 @@ export const timelineSlice = createSlice({
     currentTrackIndex: 0,
     isTranslate: false,
     untilId: "0000000000",
+    isEmptyTimeline: false,
   },
 
   reducers: {
@@ -141,6 +148,9 @@ export const timelineSlice = createSlice({
     setUntilId(state, action) {
       state.untilId = action.payload;
     },
+    resetIsEmptyTimeline(state) {
+      state.isEmptyTimeline = false;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAsyncGetTimeline.fulfilled, (state, action) => {
@@ -158,6 +168,23 @@ export const timelineSlice = createSlice({
     });
     builder.addCase(fetchAsyncGetTimeline.rejected, (state, action) => {
       console.log(action.error?.stack);
+
+      if (action.error.message) {
+        // timelineが空だった場合、isEmptyTimelineをtrueとする
+        // timelineJudgeError関数では、stateの更新ができないため、関数外で行う
+        // timeline初回取得以降に515(timelineが取得できなかった)場合はtimelineを初期化したくないため、untilIdの条件を付与
+        if (action.error.message.includes("515")) {
+          state.isEmptyTimeline = true;
+          if (state.untilId !== "0000000000") {
+            return;
+          }
+        } else {
+          timelineJudgeError(action.error.message!, action.meta.arg);
+        }
+      } else {
+        const errorText = `Errorが発生しました: ${action.error.message}`;
+        window.alert(errorText);
+      }
       // 現在表示されているタイムラインを初期化する
       state.timelines = [
         {
@@ -170,13 +197,6 @@ export const timelineSlice = createSlice({
           username: "",
         },
       ];
-
-      if (action.error.message) {
-        timelineJudgeError(action.error.message!, action.meta.arg);
-      } else {
-        const errorText = `Errorが発生しました: ${action.error.message}`;
-        window.alert(errorText);
-      }
     });
     builder.addCase(
       fetchAsyncGetTimelineTranslate.fulfilled,
@@ -245,6 +265,7 @@ export const {
   setCurrentTrackIndex,
   setIsTranslate,
   setUntilId,
+  resetIsEmptyTimeline,
 } = timelineSlice.actions;
 
 export const selectIsLoadingTimeline = (state: RootState) =>
@@ -259,4 +280,6 @@ export const selectCurrentTrackIndex = (state: RootState) =>
 export const selectIsTranslate = (state: RootState) =>
   state.timeline.isTranslate;
 export const selectUntilId = (state: RootState) => state.timeline.untilId;
+export const selectIsEmptyTimeline = (state: RootState) =>
+  state.timeline.isEmptyTimeline;
 export default timelineSlice.reducer;

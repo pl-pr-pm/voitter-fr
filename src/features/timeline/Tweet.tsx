@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentTrackIndex, selectCurrentTrackIndex } from "./timelineSlice";
 import styles from "./Tweet.module.css";
+
 export const Tweet: React.FC<{
   index: number;
   tweetText: string;

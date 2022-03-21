@@ -11,6 +11,13 @@
   margin-top: 50%;
 }
 
+.timeline_voice_progress {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .timeilne_player {
   position: fixed;
   bottom: 0;
