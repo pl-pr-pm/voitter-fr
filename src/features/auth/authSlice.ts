@@ -58,7 +58,6 @@ export const fetchAsyncLogout = createAsyncThunk(
     } catch (e: any) {
       // AccessTokenが期限切れた場合、refresh API を実行する
       if (e.message.indexOf("401") !== -1) {
-        console.log("error", e.message);
         await axios.get(`${apiUrl}auth/refresh`, {
           withCredentials: true,
         });
@@ -110,9 +109,9 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
       });
       return res.data;
     } catch (e: any) {
+      console.log("error", e.message);
       // AccessTokenが期限切れた場合、refresh API を実行する
       if (e.message.indexOf("401") !== -1) {
-        console.log("error", e.message);
         await axios.get(`${apiUrl}auth/refresh`, {
           withCredentials: true,
         });
@@ -123,6 +122,8 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
           },
         });
         return res.data;
+      } else if (e.message.indexOf("530") !== -1) {
+        throw new Error("530_既に登録されているユーザーです。");
       }
     }
   }
@@ -206,6 +207,7 @@ export const authSlice = createSlice({
 
     builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
       state.loginUsername = action.payload;
+      state.profile.password = "";
     });
 
     builder.addCase(fetchAsyncLogin.rejected, (state, action) => {
@@ -234,6 +236,7 @@ export const authSlice = createSlice({
 
     builder.addCase(fetchAsyncGetProf.fulfilled, (state, action) => {
       state.profile = action.payload;
+      state.profile.password = "";
     });
     builder.addCase(fetchAsyncGetProf.rejected, (state, action) => {
       const errorText = `Errorが発生しました: ${action.error.message}`;
@@ -242,10 +245,16 @@ export const authSlice = createSlice({
 
     builder.addCase(fetchAsyncUpdateProf.fulfilled, (state, action) => {
       state.profile = action.payload;
+      state.profile.password = "";
     });
     builder.addCase(fetchAsyncUpdateProf.rejected, (state, action) => {
-      const errorText = `Errorが発生しました: ${action.error.message}`;
-      window.alert(errorText);
+      console.log(action);
+      if (action.error.stack) {
+        authJudgeError("UpdateProf", action.error.stack!, action.meta.arg);
+      } else {
+        const errorText = `Errorが発生しました: ${action.error.message}`;
+        window.alert(errorText);
+      }
     });
   },
 });

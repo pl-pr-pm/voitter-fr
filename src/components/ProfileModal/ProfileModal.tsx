@@ -75,6 +75,7 @@ const ProfileModal: React.FC = () => {
     await dispatch(fetchAsyncUpdateProf(params));
     await dispatch(fetchCredEnd());
     await dispatch(resetOpenProfile());
+    setImage("");
   };
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -113,13 +114,18 @@ const ProfileModal: React.FC = () => {
     const signUp = async () => {
       const packet = { username: username, password: password };
       await dispatch(fetchCredStart());
+      // signup後、続けてLoginさせたい。ただ、同一ユーザー名でのsignupの場合、エラーとし、Login処理はさせない
+      // signup時、同一ユーザー登録のエラーだった場合、exceptionを発生、キャッチし、エラーハンドリング実施
+      // exceptionがない場合は、通常処理
+      let isError = false;
       try {
         await dispatch(fetchAsyncSignup(packet));
       } catch (e: any) {
+        isError = true;
         await dispatch(fetchCredEnd());
         await dispatch(resetOpenSignUp());
       }
-      if (!e) {
+      if (!isError) {
         await dispatch(fetchCredEnd());
         await dispatch(fetchAsyncLogin(packet));
         await dispatch(resetOpenSignUp());
