@@ -24,6 +24,7 @@ export const fetchAsyncSignup = createAsyncThunk(
   async (authen: PROPS_SIGNINUP_AUTHEN) => {
     const res = await axios.post(`${apiUrl}auth/signup`, authen, {
       withCredentials: true,
+      xsrfCookieName: "_csrf",
       headers: {
         "Content-Type": "application/json",
       },
@@ -37,6 +38,7 @@ export const fetchAsyncLogin = createAsyncThunk(
   async (authen: PROPS_SIGNINUP_AUTHEN) => {
     const res = await axios.post(`${apiUrl}auth/signin`, authen, {
       withCredentials: true,
+      xsrfCookieName: "_csrf",
       headers: {
         "Content-Type": "application/json",
       },
@@ -49,8 +51,9 @@ export const fetchAsyncLogout = createAsyncThunk(
   "auth/logout", //action name
   async () => {
     try {
-      const res = await axios.post(`${apiUrl}auth/signout`, null, {
+      await axios.put(`${apiUrl}auth/signout`, null, {
         withCredentials: true,
+        xsrfCookieName: "_csrf",
         headers: {
           "Content-Type": "application/json",
         },
@@ -60,9 +63,11 @@ export const fetchAsyncLogout = createAsyncThunk(
       if (e.message.indexOf("401") !== -1) {
         await axios.get(`${apiUrl}auth/refresh`, {
           withCredentials: true,
+          xsrfCookieName: "_csrf",
         });
         await axios.post(`${apiUrl}auth/signout`, null, {
           withCredentials: true,
+          xsrfCookieName: "_csrf",
           headers: {
             "Content-Type": "application/json",
           },
@@ -78,6 +83,7 @@ export const fetchAsyncGetProf = createAsyncThunk(
     try {
       const res = await axios.get(`${apiUrl}auth/user`, {
         withCredentials: true,
+        xsrfCookieName: "_csrf",
       });
       return res.data[0];
     } catch (e: any) {
@@ -86,9 +92,11 @@ export const fetchAsyncGetProf = createAsyncThunk(
         console.log("error", e.message);
         await axios.get(`${apiUrl}auth/refresh`, {
           withCredentials: true,
+          xsrfCookieName: "_csrf",
         });
         const res = await axios.get(`${apiUrl}auth/user`, {
           withCredentials: true,
+          xsrfCookieName: "_csrf",
         });
         return res.data[0];
       }
@@ -103,6 +111,7 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
     try {
       const res = await axios.put(`${apiUrl}auth/user`, authen, {
         withCredentials: true,
+        xsrfCookieName: "_csrf",
         headers: {
           "Content-Type": "application/json",
         },
@@ -114,9 +123,11 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
       if (e.message.indexOf("401") !== -1) {
         await axios.get(`${apiUrl}auth/refresh`, {
           withCredentials: true,
+          xsrfCookieName: "_csrf",
         });
         const res = await axios.post(`${apiUrl}auth/user`, authen, {
           withCredentials: true,
+          xsrfCookieName: "_csrf",
           headers: {
             "Content-Type": "application/json",
           },
