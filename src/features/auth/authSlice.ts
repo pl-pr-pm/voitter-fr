@@ -102,7 +102,7 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
   // 型強行突破
   async (authen: any) => {
     try {
-      const res = await axios.post(`${apiUrl}auth/user`, authen, {
+      const res = await axios.put(`${apiUrl}auth/user`, authen, {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
