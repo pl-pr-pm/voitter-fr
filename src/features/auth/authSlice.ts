@@ -65,7 +65,7 @@ export const fetchAsyncLogout = createAsyncThunk(
           withCredentials: true,
           xsrfCookieName: "_csrf",
         });
-        await axios.post(`${apiUrl}auth/signout`, null, {
+        await axios.put(`${apiUrl}auth/signout`, null, {
           withCredentials: true,
           xsrfCookieName: "_csrf",
           headers: {
@@ -125,7 +125,7 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
           withCredentials: true,
           xsrfCookieName: "_csrf",
         });
-        const res = await axios.post(`${apiUrl}auth/user`, authen, {
+        const res = await axios.put(`${apiUrl}auth/user`, authen, {
           withCredentials: true,
           xsrfCookieName: "_csrf",
           headers: {
